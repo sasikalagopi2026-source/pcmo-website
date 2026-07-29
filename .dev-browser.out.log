@@ -1,0 +1,138 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api"
+
+[WEB] 
+[WEB] > vite_react_shadcn_ts@0.0.0 dev
+[WEB] > vite
+[WEB] 
+[API] 
+[API] > vite_react_shadcn_ts@0.0.0 dev:api
+[API] > tsx watch server/index.ts
+[API] 
+[WEB] 
+[WEB]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m4657[22m[2m[0m ms[22m
+[WEB] 
+[WEB]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m8080[22m/[39m
+[WEB]   [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.0.153:[1m8080[22m/[39m
+[API] PCMO TypeScript API running at http://127.0.0.1:3001
+[API] Error: connect ECONNREFUSED 127.0.0.1:3306
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:431:27)
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:58:39)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+[API]     at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+[API]   errno: -4078,
+[API]   code: 'ECONNREFUSED',
+[API]   syscall: 'connect',
+[API]   address: '127.0.0.1',
+[API]   port: 3306,
+[API]   fatal: true
+[API] }
+[API] Error: connect ECONNREFUSED 127.0.0.1:3306
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:403:27)
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:58:39)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+[API]     at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:295:15
+[API]     at processParams (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:582:12)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:291:5) {
+[API]   errno: -4078,
+[API]   code: 'ECONNREFUSED',
+[API]   syscall: 'connect',
+[API]   address: '127.0.0.1',
+[API]   port: 3306,
+[API]   fatal: true
+[API] }
+[WEB] [2m08:47:39[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/AdminDataTable.tsx, /src/index.css[22m
+[WEB] [2m08:47:39[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/AdminDataTable.tsx, /src/index.css[22m
+[WEB] [2m08:48:01[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33mrecharts[32m[39m
+[WEB] [2m08:48:01[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[WEB] [2m08:48:30[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminDashboard.tsx, /src/index.css[22m
+[WEB] [2m11:58:25[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[WEB] [2m11:58:34[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Volunteer.tsx, /src/index.css[22m
+[WEB] [2m12:04:03[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Volunteer.tsx, /src/index.css[22m
+[WEB] [2m12:04:03[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Volunteer.tsx, /src/index.css[22m
+[API] 13:04:46 [tsx] change in ./server\index.ts Restarting...
+[API] cPCMO TypeScript API running at http://127.0.0.1:3001
+[API] 13:05:32 [tsx] change in ./server\index.ts Restarting...
+[API] c
+[WEB] [2m13:05:33[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/community-posts?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m13:05:35[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/community-posts?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[API] PCMO TypeScript API running at http://127.0.0.1:3001
+[WEB] [2m13:09:28[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/CommunityProfile.tsx, /src/index.css[22m
+[WEB] [2m13:09:28[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/CommunityProfile.tsx, /src/index.css[22m
+[WEB] [2m13:29:36[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Account.tsx, /src/index.css[22m
+[WEB] [2m13:29:37[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Account.tsx, /src/index.css[22m
+[API] 16:26:26 [tsx] change in ./server\index.ts Restarting...
+[API] cPCMO TypeScript API running at http://127.0.0.1:3001
+[API] 16:26:44 [tsx] change in ./server\index.ts Restarting...
+[API] c
+[WEB] [2m16:26:49[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/admin-modules?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:49[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/library?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:49[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/library-media?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/admin-modules?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/library?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:51[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/library-media?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/admin-modules?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/library?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:53[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/library-media?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:26:55[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/me[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[API] PCMO TypeScript API running at http://127.0.0.1:3001
+[API] 16:28:16 [tsx] change in ./server\index.ts Restarting...
+[API] cPCMO TypeScript API running at http://127.0.0.1:3001
+[API] 16:28:36 [tsx] change in ./server\index.ts Restarting...
+[API] cPCMO TypeScript API running at http://127.0.0.1:3001
+[WEB] [2m16:28:54[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/EbookDetail.tsx, /src/index.css[22m
+[WEB] [2m16:28:54[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/EbookDetail.tsx, /src/index.css[22m
+[WEB] [2m16:29:14[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Library.tsx, /src/index.css[22m
+[API] Error: Duplicate entry 'saranyagopicse@gmail.com' for key 'email'
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:427:22)
+[API]     at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+[API]   code: 'ER_DUP_ENTRY',
+[API]   errno: 1062,
+[API]   sqlState: '23000',
+[API]   sqlMessage: "Duplicate entry 'saranyagopicse@gmail.com' for key 'email'",
+[API]   sql: "INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, 'student')"
+[API] }
+[API] 17:16:58 [tsx] change in ./server\index.ts Restarting...
+[API] cPCMO TypeScript API running at http://127.0.0.1:3001
+[WEB] [2m17:17:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Login.tsx, /src/index.css[22m
+[WEB] [2m17:17:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Login.tsx, /src/index.css[22m
+[WEB] [2m18:14:03[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/CourseDetail.tsx, /src/index.css[22m
+[WEB] [2m18:14:04[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/CourseDetail.tsx[22m
+[WEB] npm run dev exited with code 1073807364
+--> Sending SIGTERM to other processes..
+[API] npm run dev:api exited with code 1073807364

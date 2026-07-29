@@ -1,0 +1,353 @@
+09:04:03 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:03 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:05 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:05 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:07 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:07 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:11 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:04:11 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:16 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:16 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:17 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:17 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:19 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:19 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:23 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:24 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:26 [vite] http proxy error: /api/auth/me
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:38 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:38 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:39 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:39 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:42 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:42 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:46 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:46 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:51 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:51 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:52 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:52 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:55 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:55 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:59 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:07:59 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:10:38 [vite] http proxy error: /api/pages/about
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:10:39 [vite] http proxy error: /api/pages/about
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:10:41 [vite] http proxy error: /api/pages/about
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:10:45 [vite] http proxy error: /api/pages/about
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:02 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:02 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:03 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:03 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:05 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:05 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:06 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:06 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:08 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:08 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:11 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:11 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:12 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:12 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:14 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:14 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:18 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:18 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:50 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:50 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:54 [vite] http proxy error: /api/auth/login
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:11:57 [vite] http proxy error: /api/auth/login
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:42:36 [vite] http proxy error: /api/resources/notifications?limit=100
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:42:36 [vite] http proxy error: /api/student/dashboard
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:23 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:23 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:24 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:24 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:24 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:24 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:24 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:24 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:25 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:25 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:26 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:26 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:27 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:27 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:30 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:30 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:31 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:31 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:32 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:32 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:32 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:33 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:33 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:33 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:33 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:34 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:34 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:35 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:35 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:36 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:36 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:39 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:39 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:40 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:44:40 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:30 [vite] http proxy error: /api/student/dashboard
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:30 [vite] http proxy error: /api/resources/notifications?limit=100
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:32 [vite] http proxy error: /api/student/dashboard
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:32 [vite] http proxy error: /api/resources/notifications?limit=100
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:34 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:34 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:34 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:35 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:36 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:36 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:38 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:38 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:38 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:38 [vite] http proxy error: /api/auth/me
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:40 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:40 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:40 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:42 [vite] http proxy error: /api/public/pages
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:42 [vite] http proxy error: /api/public/site
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+09:46:42 [vite] http proxy error: /api/public/homepage
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+npm notice
+npm notice New major version of npm available! 11.12.1 -> 12.0.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.1
+npm notice To update run: npm install -g npm@12.0.1
+npm notice

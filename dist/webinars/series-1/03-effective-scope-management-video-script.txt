@@ -1,0 +1,28 @@
+PCMO WEBINAR VIDEO PRODUCTION SCRIPT
+Series 1 - Webinar 03
+
+TITLE: Building Successful Projects Through Effective Scope Management
+AUDIENCE: Project and contract professionals
+OBJECTIVE: Build a controlled path from intended outcomes to accepted deliverables.
+
+OPENING
+Welcome to PCMO Series One: Project Management Fundamentals. In this webinar, we explore effective scope management.
+
+SCENE 1 - SCOPE DEFINITION
+Clarify outcomes, requirements, deliverables, boundaries, assumptions, exclusions, acceptance criteria, constraints, interfaces, and responsibilities before detailed commitment.
+
+SCENE 2 - WORK BREAKDOWN STRUCTURE
+Decompose deliverables into manageable work packages that support ownership, estimating, scheduling, budgeting, risk analysis, procurement, progress measurement, and control.
+
+SCENE 3 - SCOPE CREEP
+Uncontrolled scope enters through informal requests, assumptions, design development, interface gaps, rework, stakeholder pressure, or work started before approval.
+
+SCENE 4 - SCOPE CONTROL
+Capture proposed change, establish contractual and technical basis, evaluate impact, obtain authority, update baselines and obligations, communicate decisions, and verify implementation.
+
+CLOSING CALL TO ACTION
+Review one current project and identify an unclear boundary, missing acceptance criterion, or unapproved change that needs action.
+
+END CARD
+Project & Contracts Management Organisation
+www.pcmo.world | info@pcmo.world

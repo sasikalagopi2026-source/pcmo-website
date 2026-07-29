@@ -1,0 +1,455 @@
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "specialties"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "null",
+    "path": [
+      "open_to"
+    ],
+    "message": "Expected array, received null"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "null",
+    "path": [
+      "links"
+    ],
+    "message": "Expected object, received null"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:749:8
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/index.js:92:69
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/server-dist/auth.js:10:9)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'null',
+      path: [Array],
+      message: 'Expected array, received null'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'null',
+      path: [Array],
+      message: 'Expected object, received null'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}

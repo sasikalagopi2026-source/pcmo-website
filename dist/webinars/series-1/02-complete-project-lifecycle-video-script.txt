@@ -1,0 +1,31 @@
+PCMO WEBINAR VIDEO PRODUCTION SCRIPT
+Series 1 - Webinar 02
+
+TITLE: The Complete Project Lifecycle Explained
+AUDIENCE: Beginners
+OBJECTIVE: Understand the decisions, controls, and outputs across the complete project lifecycle.
+
+OPENING
+Welcome to PCMO Series One: Project Management Fundamentals. In this webinar, we explain the complete project lifecycle.
+
+SCENE 1 - INITIATION
+Define the problem or opportunity, intended benefits, strategic fit, stakeholders, initial scope, constraints, risks, options, sponsorship, and authority to proceed.
+
+SCENE 2 - PLANNING
+Translate intent into an integrated plan for scope, schedule, cost, resources, procurement, contracts, risk, quality, communication, governance, and change control.
+
+SCENE 3 - EXECUTION
+Mobilise people and suppliers, produce deliverables, administer contracts, coordinate interfaces, manage quality, communicate decisions, and maintain reliable delivery records.
+
+SCENE 4 - MONITORING AND CONTROL
+Compare actual performance with approved baselines, analyse variance and trends, update forecasts, manage risk and change, escalate exceptions, and implement corrective action.
+
+SCENE 5 - CLOSEOUT
+Complete and accept deliverables, close contracts, resolve open actions, transfer outputs, archive records, capture lessons, release resources, and review benefits.
+
+CLOSING CALL TO ACTION
+Use the PCMO project lifecycle checklist to assess which decisions and records are required at your next stage gate.
+
+END CARD
+Project & Contracts Management Organisation
+www.pcmo.world | info@pcmo.world

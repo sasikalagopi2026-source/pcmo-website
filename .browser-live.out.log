@@ -1,0 +1,51 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api"
+
+[WEB] 
+[WEB] > vite_react_shadcn_ts@0.0.0 dev
+[WEB] > vite
+[WEB] 
+[API] 
+[API] > vite_react_shadcn_ts@0.0.0 dev:api
+[API] > tsx watch server/index.ts
+[API] 
+[WEB] 
+[WEB]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1027[22m[2m[0m ms[22m
+[WEB] 
+[WEB]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m8080[22m/[39m
+[WEB]   [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.0.153:[1m8080[22m/[39m
+[WEB] [2m16:09:33[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/membership-plans[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:33[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/homepage[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:35[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/membership-plans[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:35[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/homepage[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/membership-plans[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:37[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/homepage[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:40[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/conversations[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:41[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/membership-plans[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:41[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/conversations[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m16:09:43[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/public/conversations[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[API] PCMO TypeScript API running at http://127.0.0.1:3001
+[WEB] npm run dev exited with code 3221226505
+--> Sending SIGTERM to other processes..
+[API] npm run dev:api exited with code 1

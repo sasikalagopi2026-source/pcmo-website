@@ -1,0 +1,13 @@
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-01.png'
+duration 17.242
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-02.png'
+duration 17.242
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-03.png'
+duration 17.242
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-04.png'
+duration 17.242
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-05.png'
+duration 17.242
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-06.png'
+duration 17.242
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/03-effective-scope-management/slide-06.png'

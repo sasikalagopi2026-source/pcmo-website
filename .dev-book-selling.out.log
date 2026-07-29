@@ -1,0 +1,23 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api"
+
+[WEB] 
+[WEB] > vite_react_shadcn_ts@0.0.0 dev
+[WEB] > vite
+[WEB] 
+[API] 
+[API] > vite_react_shadcn_ts@0.0.0 dev:api
+[API] > tsx watch server/index.ts
+[API] 
+[WEB] 
+[WEB]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1725[22m[2m[0m ms[22m
+[WEB] 
+[WEB]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m8080[22m/[39m
+[WEB]   [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.0.153:[1m8080[22m/[39m
+[API] PCMO TypeScript API running at http://127.0.0.1:3001
+[WEB] [2m17:26:44[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[WEB] [2m17:26:44[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[WEB] [31mfailed to load config from C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\vite.config.ts[39m
+[WEB] [2m17:26:45[22m [31m[1m[vite][22m[39m Cannot find package 'pcmo-tagger' imported from C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\vite.config.ts.timestamp-1782394004995-0affd7587a20a8.mjs
+[WEB] [2m17:26:45[22m [31m[1m[vite][22m[39m server restart failed

@@ -1,0 +1,32 @@
+
+> vite_react_shadcn_ts@0.0.0 dev
+> vite --host 127.0.0.1
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m3600[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m8080[22m/[39m
+[2m09:00:44[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:00:46[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:01:04[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33m@radix-ui/react-checkbox, @radix-ui/react-select[32m[39m
+[2m09:01:04[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m09:01:37[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Library.tsx, /src/index.css[22m
+[2m09:01:38[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Library.tsx[22m
+[2m09:23:42[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/EbookDetail.tsx, /src/index.css[22m
+[2m09:23:45[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/EbookDetail.tsx, /src/index.css[22m
+[2m09:46:41[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:46:42[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:46:57[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:47:24[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:47:53[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:48:16[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminLibraryManagement.tsx, /src/index.css[22m
+[2m09:50:35[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminCourseWorkspace.tsx, /src/index.css[22m
+[2m09:50:49[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminCourseWorkspace.tsx, /src/index.css[22m
+[2m09:51:02[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminCourseWorkspace.tsx, /src/index.css[22m
+[2m09:51:29[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminCourseWorkspace.tsx, /src/index.css[22m
+[2m11:00:35[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Membership.tsx, /src/index.css[22m
+[2m11:00:36[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Membership.tsx, /src/index.css[22m
+[2m16:30:42[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/AdminResourceManager.tsx, /src/index.css[22m
+[2m16:31:10[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m16:31:47[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/DashboardSidebar.tsx, /src/index.css[22m
+[2m16:31:56[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/DashboardSidebar.tsx, /src/index.css[22m

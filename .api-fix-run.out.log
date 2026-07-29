@@ -1,0 +1,8 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:api
+> tsx watch server/index.ts
+
+PCMO TypeScript API running at http://127.0.0.1:3001
+13:49:59 [tsx] change in ./server\index.ts Restarting...
+c13:53:08 [tsx] change in ./server\index.ts Rerunning...
+c

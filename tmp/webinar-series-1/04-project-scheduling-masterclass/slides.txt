@@ -1,0 +1,13 @@
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-01.png'
+duration 17.251
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-02.png'
+duration 17.251
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-03.png'
+duration 17.251
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-04.png'
+duration 17.251
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-05.png'
+duration 17.251
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-06.png'
+duration 17.251
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/04-project-scheduling-masterclass/slide-06.png'

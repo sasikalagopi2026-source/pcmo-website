@@ -1,0 +1,4 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api"
+

@@ -1,0 +1,10 @@
+[2m08:21:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/me[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m08:22:04[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m08:24:07[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m09:01:37[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to load url /src/pages/Library.tsx (resolved id: C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/src/pages/Library.tsx) in C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/src/App.tsx. Does the file exist?

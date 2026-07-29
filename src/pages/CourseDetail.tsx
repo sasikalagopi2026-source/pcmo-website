@@ -1,0 +1,324 @@
+import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Circle,
+  Clock,
+  FileText,
+  LockKeyhole,
+  PlayCircle,
+  ShieldCheck,
+} from "lucide-react";
+import DashboardLayout from "@/components/DashboardLayout";
+import { api, resourceApi } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+
+type Course = {
+  id: string;
+  title: string;
+  description?: string;
+  level: string;
+  duration?: string;
+  credits: number;
+  category?: string;
+  instructor?: string;
+  quiz_question_count: number;
+  progress: number;
+  module_count: number;
+  completed_module_count: number;
+};
+
+type CourseMaterial = {
+  id: string;
+  material_type: "video" | "study_guide" | "reading" | "worksheet" | "case_study";
+  title: string;
+  description?: string;
+  content_url?: string | null;
+  body?: string;
+  duration?: string | null;
+};
+
+type CourseAssessment = {
+  id: string;
+  title: string;
+  assessment_type: string;
+  instructions: string;
+  passing_score: number;
+  max_attempts: number;
+};
+
+const materialLabels: Record<CourseMaterial["material_type"], string> = {
+  video: "Video",
+  study_guide: "Study Guide",
+  reading: "Reading",
+  worksheet: "Worksheet",
+  case_study: "Case Study",
+};
+
+const materialOrder: CourseMaterial["material_type"][] = ["video", "study_guide", "reading", "worksheet", "case_study"];
+
+const materialIcon = (type?: CourseMaterial["material_type"]) => {
+  if (type === "video") return PlayCircle;
+  return FileText;
+};
+
+const previewText = (value?: string, limit = 150) => {
+  if (!value) return "";
+  const normalized = value.replace(/\s+/g, " ").trim();
+  return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
+};
+
+const CourseDetail = () => {
+  const { id = "" } = useParams();
+  const queryClient = useQueryClient();
+  const [selectedMaterialId, setSelectedMaterialId] = useState("");
+
+  const course = useQuery({
+    queryKey: ["course", id],
+    queryFn: () => api<Course>(`/api/courses/${id}`),
+    enabled: Boolean(id),
+  });
+  const materials = useQuery({
+    queryKey: ["course-materials", id],
+    queryFn: () => resourceApi.list<CourseMaterial>("course-materials", { course_id: id, status: "published", limit: 100 }),
+    enabled: Boolean(id) && Boolean(course.data),
+  });
+  const assessments = useQuery({
+    queryKey: ["course-assessments", id],
+    queryFn: () => resourceApi.list<CourseAssessment>("course-assessments", { course_id: id, status: "published", limit: 100 }),
+    enabled: Boolean(id) && Boolean(course.data),
+  });
+  const moduleProgress = useQuery({
+    queryKey: ["module-progress", id],
+    queryFn: () => api<Array<{ material_id: string; completed_at: string }>>(`/api/courses/${id}/module-progress`),
+    enabled: Boolean(id) && Boolean(course.data),
+  });
+  const assessmentAccess = useQuery({
+    queryKey: ["assessment-access", id],
+    queryFn: () => api<{ totalMaterials: number; completedMaterials: number; unlocked: boolean }>(`/api/courses/${id}/assessment-access`),
+    enabled: Boolean(id) && Boolean(course.data),
+  });
+  const toggleModule = useMutation({
+    mutationFn: ({ materialId, completed }: { materialId: string; completed: boolean }) =>
+      api(`/api/courses/${id}/modules/${materialId}/progress`, {
+        method: "PUT",
+        body: JSON.stringify({ completed }),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["module-progress", id] });
+      void queryClient.invalidateQueries({ queryKey: ["course", id] });
+      void queryClient.invalidateQueries({ queryKey: ["courses"] });
+      void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["assessment-access", id] });
+    },
+  });
+
+  const materialRows = useMemo(() => {
+    const rows = materials.data?.rows ?? [];
+    return [...rows].sort((a, b) => materialOrder.indexOf(a.material_type) - materialOrder.indexOf(b.material_type));
+  }, [materials.data?.rows]);
+  const completedIds = useMemo(() => new Set(moduleProgress.data?.map((item) => item.material_id) ?? []), [moduleProgress.data]);
+  const nextIncomplete = materialRows.find((material) => !completedIds.has(material.id));
+  const selectedMaterial = materialRows.find((material) => material.id === selectedMaterialId) ?? nextIncomplete ?? materialRows[0];
+  const selectedIndex = selectedMaterial ? materialRows.findIndex((material) => material.id === selectedMaterial.id) : -1;
+  const previousMaterial = selectedIndex > 0 ? materialRows[selectedIndex - 1] : null;
+  const nextMaterial = selectedIndex >= 0 && selectedIndex < materialRows.length - 1 ? materialRows[selectedIndex + 1] : null;
+  const selectedComplete = selectedMaterial ? completedIds.has(selectedMaterial.id) : false;
+  const verifiedCount = assessmentAccess.data?.completedMaterials ?? course.data?.completed_module_count ?? 0;
+  const totalRequired = assessmentAccess.data?.totalMaterials ?? course.data?.module_count ?? materialRows.length;
+  const remainingForAssessment = Math.max(0, totalRequired - verifiedCount);
+
+  useEffect(() => {
+    if (!selectedMaterialId && materialRows.length) {
+      setSelectedMaterialId(nextIncomplete?.id ?? materialRows[0].id);
+    }
+  }, [materialRows, nextIncomplete?.id, selectedMaterialId]);
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-7xl space-y-6">
+        {course.isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading course...</p>
+        ) : course.error ? (
+          <p className="rounded-lg border border-border bg-card p-5 text-sm text-destructive">{course.error.message}</p>
+        ) : course.data ? (
+          <>
+            <section className="rounded-xl border border-border bg-card p-6">
+              <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {course.data.category && <Badge variant="secondary">{course.data.category}</Badge>}
+                    <Badge variant="outline">{course.data.level}</Badge>
+                  </div>
+                  <h1 className="mt-3 font-heading text-3xl font-bold">{course.data.title}</h1>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{course.data.description}</p>
+                  <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <span>{course.data.credits} credits</span>
+                    {course.data.duration && <span>{course.data.duration}</span>}
+                    {course.data.instructor && <span>{course.data.instructor}</span>}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Course completion</span>
+                    <strong>{Number(course.data.progress ?? 0)}%</strong>
+                  </div>
+                  <Progress value={Number(course.data.progress ?? 0)} className="mt-3 h-2" />
+                  <p className="mt-2 text-xs text-muted-foreground">{verifiedCount} of {totalRequired} learning materials completed</p>
+                  <Button className="mt-4 w-full" onClick={() => selectedMaterial && setSelectedMaterialId(selectedMaterial.id)} disabled={!selectedMaterial}>
+                    Continue learning
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-6 lg:grid-cols-[360px_1fr]">
+              <aside className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-primary">Step 1</p>
+                    <h2 className="font-heading text-lg font-bold">Course Outline</h2>
+                  </div>
+                  <Badge variant="outline">{materialRows.length} modules</Badge>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {materialRows.map((material, index) => {
+                    const Icon = materialIcon(material.material_type);
+                    const complete = completedIds.has(material.id);
+                    const active = selectedMaterial?.id === material.id;
+                    return (
+                      <button
+                        key={material.id}
+                        type="button"
+                        onClick={() => setSelectedMaterialId(material.id)}
+                        className={`w-full rounded-lg border p-3 text-left transition hover:bg-secondary/60 ${active ? "border-primary bg-primary/5" : "border-border bg-background"}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full ${complete ? "bg-success/10 text-success" : active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                            {complete ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs text-muted-foreground">Module {index + 1}</p>
+                              {material.duration && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3 w-3" />{material.duration}</span>}
+                            </div>
+                            <p className="mt-1 font-medium">{material.title}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">{materialLabels[material.material_type]}</p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </aside>
+
+              <div className="space-y-6">
+                <section className="rounded-xl border border-border bg-card p-6">
+                  {selectedMaterial ? (
+                    <>
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary">{materialLabels[selectedMaterial.material_type]}</Badge>
+                            {selectedMaterial.duration && <span className="text-sm text-muted-foreground">{selectedMaterial.duration}</span>}
+                            {selectedComplete && <Badge className="bg-success text-success-foreground">Completed</Badge>}
+                          </div>
+                          <h2 className="mt-3 font-heading text-2xl font-bold">{selectedMaterial.title}</h2>
+                          {selectedMaterial.description && <p className="mt-2 text-sm text-muted-foreground">{selectedMaterial.description}</p>}
+                        </div>
+                        <Button
+                          variant={selectedComplete ? "secondary" : "default"}
+                          disabled={toggleModule.isPending}
+                          onClick={() => toggleModule.mutate({ materialId: selectedMaterial.id, completed: !selectedComplete })}
+                        >
+                          {selectedComplete ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                          {selectedComplete ? "Mark pending" : "Mark complete"}
+                        </Button>
+                      </div>
+
+                      <div className="mt-6 rounded-lg border border-border bg-secondary/20 p-5">
+                        {selectedMaterial.body ? (
+                          <p className="whitespace-pre-line text-sm leading-7">{selectedMaterial.body}</p>
+                        ) : (
+                          <p className="text-sm leading-7 text-muted-foreground">{previewText(selectedMaterial.description) || "No lesson body has been added yet."}</p>
+                        )}
+                        {selectedMaterial.content_url && (
+                          <Button asChild variant="outline" className="mt-5">
+                            <a href={selectedMaterial.content_url} target="_blank" rel="noreferrer">Open material</a>
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="mt-5 flex flex-wrap justify-between gap-3">
+                        <Button variant="outline" disabled={!previousMaterial} onClick={() => previousMaterial && setSelectedMaterialId(previousMaterial.id)}>
+                          <ArrowLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+                        <Button variant="outline" disabled={!nextMaterial} onClick={() => nextMaterial && setSelectedMaterialId(nextMaterial.id)}>
+                          Next
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No learning materials are available for this course yet.</p>
+                  )}
+                </section>
+
+                <section className={`rounded-xl border p-5 ${assessmentAccess.data?.unlocked ? "border-success/30 bg-success/5" : "border-border bg-secondary/50"}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${assessmentAccess.data?.unlocked ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                      {assessmentAccess.data?.unlocked ? <ShieldCheck className="h-5 w-5" /> : <LockKeyhole className="h-5 w-5" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-semibold uppercase text-primary">Step 2</p>
+                      <h2 className="font-heading text-xl font-bold">{assessmentAccess.data?.unlocked ? "Assessment Unlocked" : "Assessment Locked"}</h2>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {assessmentAccess.data?.unlocked
+                          ? `Learning materials verified. ${course.data.quiz_question_count || 0} assessment questions are ready.`
+                          : `Complete ${remainingForAssessment} more learning material${remainingForAssessment === 1 ? "" : "s"} to unlock the quiz. ${verifiedCount} of ${totalRequired} verified.`}
+                      </p>
+                      <Progress value={totalRequired ? Math.min(100, (verifiedCount / totalRequired) * 100) : 0} className="mt-4 h-2" />
+                      {assessmentAccess.data?.unlocked ? (
+                        <Button asChild className="mt-4"><Link to={`/certification-quiz?course=${id}`}>Open assessment</Link></Button>
+                      ) : (
+                        <Button className="mt-4" disabled><LockKeyhole className="h-4 w-4" />Complete materials first</Button>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-border bg-card p-6">
+              <h2 className="font-heading text-xl font-bold">Other Assessments</h2>
+              <div className="mt-4 grid gap-3">
+                {assessments.data?.rows.map((assessment) => (
+                  <article key={assessment.id} className="rounded-lg border border-border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="font-heading font-semibold">{assessment.title}</h3>
+                      <Badge>{assessment.assessment_type.replace("_", " ")}</Badge>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{assessment.instructions}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">Pass mark: {assessment.passing_score}% - Maximum attempts: {assessment.max_attempts}</p>
+                  </article>
+                ))}
+                {!assessments.isLoading && !assessments.data?.rows.length && (
+                  <p className="text-sm text-muted-foreground">No additional assessments are available.</p>
+                )}
+              </div>
+            </section>
+          </>
+        ) : null}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default CourseDetail;

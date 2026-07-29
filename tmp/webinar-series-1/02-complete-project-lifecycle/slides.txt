@@ -1,0 +1,15 @@
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-01.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-02.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-03.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-04.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-05.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-06.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-07.png'
+duration 16.891
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/02-complete-project-lifecycle/slide-07.png'

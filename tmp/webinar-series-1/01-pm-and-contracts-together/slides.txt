@@ -1,0 +1,13 @@
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-01.png'
+duration 18.853
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-02.png'
+duration 18.853
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-03.png'
+duration 18.853
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-04.png'
+duration 18.853
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-05.png'
+duration 18.853
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-06.png'
+duration 18.853
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/01-pm-and-contracts-together/slide-06.png'

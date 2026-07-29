@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 40% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 13%;
+
+    --primary: 220 70% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 30% 95%;
+    --secondary-foreground: 220 40% 13%;
+
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 0 75% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 220 70% 25%;
+
+    --radius: 0.75rem;
+
+    --success: 150 60% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 210 80% 55%;
+    --info-foreground: 0 0% 100%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 40% 13%;
+    --sidebar-primary: 220 70% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 30% 95%;
+    --sidebar-accent-foreground: 220 40% 13%;
+    --sidebar-border: 220 15% 92%;
+    --sidebar-ring: 220 70% 25%;
+  }
+}
+
+@keyframes pcmo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pcmo-orbit {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+@keyframes pcmo-rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pcmo-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.pcmo-float { animation: pcmo-float 4s ease-in-out infinite; }
+.pcmo-orbit { animation: pcmo-orbit 24s linear infinite; }
+.pcmo-rise { animation: pcmo-rise .75s ease-out both; }
+.pcmo-progress { transform-origin: left; animation: pcmo-progress 1.8s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pcmo-float, .pcmo-orbit, .pcmo-rise, .pcmo-progress { animation: none; }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}

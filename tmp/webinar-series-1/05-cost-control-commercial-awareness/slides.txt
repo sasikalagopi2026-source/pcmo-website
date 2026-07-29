@@ -1,0 +1,13 @@
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-01.png'
+duration 17.615
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-02.png'
+duration 17.615
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-03.png'
+duration 17.615
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-04.png'
+duration 17.615
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-05.png'
+duration 17.615
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-06.png'
+duration 17.615
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/05-cost-control-commercial-awareness/slide-06.png'

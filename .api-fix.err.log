@@ -1,0 +1,230 @@
+ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+      "notification_preferences"
+    ],
+    "message": "Expected object, received string"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+      "privacy_settings"
+    ],
+    "message": "Expected object, received string"
+  }
+]
+    at get error (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/zod/v3/types.js:114:22)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:340:29)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'string',
+      path: [Array],
+      message: 'Expected object, received string'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'object',
+      received: 'string',
+      path: [Array],
+      message: 'Expected object, received string'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)]
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM incorrect_answers  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM quiz_attempts  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM incorrect_answers  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM quiz_attempts  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM incorrect_answers  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM quiz_attempts  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM quiz_attempts  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM incorrect_answers  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM quiz_attempts  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:705:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:57:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM incorrect_answers  ORDER BY updated_at DESC LIMIT 100 OFFSET 0'
+}
+Error: Unknown column 'updated_at' in 'order clause'
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:879:8)
+    at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:58:39)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+  code: 'ER_BAD_FIELD_ERROR',
+  errno: 1054,
+  sqlState: '42S22',
+  sqlMessage: "Unknown column 'updated_at' in 'order clause'",
+  sql: 'SELECT * FROM course_enrollments  ORDER BY updated_at DESC LIMIT 1 OFFSET 0'
+}

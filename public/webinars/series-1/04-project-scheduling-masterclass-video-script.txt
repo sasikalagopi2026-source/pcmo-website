@@ -1,0 +1,28 @@
+PCMO WEBINAR VIDEO PRODUCTION SCRIPT
+Series 1 - Webinar 04
+
+TITLE: Project Scheduling Masterclass
+AUDIENCE: Project controls and delivery professionals
+OBJECTIVE: Use schedule logic to support credible commitments, forecasts, and recovery decisions.
+
+OPENING
+Welcome to PCMO Series One: Project Management Fundamentals. In this webinar, we examine the foundations of reliable project scheduling.
+
+SCENE 1 - CRITICAL PATH METHOD
+Connect activities through realistic logic, durations, calendars, constraints, resources, and milestones so the schedule explains the sequence that controls completion.
+
+SCENE 2 - FLOAT
+Treat float as decision information, not free time. Understand total and free float, ownership questions, consumption, near-critical paths, and the effect of imposed constraints.
+
+SCENE 3 - BASELINES
+An approved baseline records the authorised delivery plan. It must be realistic, traceable, integrated with scope and cost, and changed only through controlled authority.
+
+SCENE 4 - RECOVERY SCHEDULES
+Recovery starts with verified progress and remaining scope. Test productivity, logic, resources, interfaces, risks, contractual constraints, and alternative scenarios before committing to a date.
+
+CLOSING CALL TO ACTION
+Challenge your next schedule review to explain the controlling path, major assumptions, float trend, risk exposure, and decision required.
+
+END CARD
+Project & Contracts Management Organisation
+www.pcmo.world | info@pcmo.world

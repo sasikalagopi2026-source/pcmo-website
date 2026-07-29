@@ -1,0 +1,21 @@
+node:internal/child_process:441
+    throw new ErrnoException(err, 'spawn');
+          ^
+
+Error: spawn EPERM
+    at ChildProcess.spawn (node:internal/child_process:441:11)
+    at spawn (node:child_process:796:9)
+    at Proxy.<anonymous> (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/concurrently/dist/lib/spawn.js:23:16)
+    at Proxy.start (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/concurrently/dist/lib/command.js:60:28)
+    at maybeRunMore (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/concurrently/dist/lib/concurrently.js:118:13)
+    at concurrently (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/concurrently/dist/lib/concurrently.js:77:9)
+    at concurrently (file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/concurrently/dist/lib/index.js:43:12)
+    at file:///C:/Users/sasik/OneDrive/Desktop/PCMO%20-%20Copy/node_modules/concurrently/dist/bin/index.js:200:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:437:25)
+    at async node:internal/modules/esm/loader:639:26 {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'spawn'
+}
+
+Node.js v24.15.0

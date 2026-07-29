@@ -1,0 +1,144 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api"
+
+[WEB] 
+[WEB] > vite_react_shadcn_ts@0.0.0 dev
+[WEB] > vite
+[WEB] 
+[API] 
+[API] > vite_react_shadcn_ts@0.0.0 dev:api
+[API] > tsx watch server/index.ts
+[API] 
+[WEB] 
+[WEB]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m3936[22m[2m[0m ms[22m
+[WEB] 
+[WEB]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m8080[22m/[39m
+[WEB]   [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.0.153:[1m8080[22m/[39m
+[API] PCMO TypeScript API running at http://127.0.0.1:3001
+[API] Error: connect ECONNREFUSED 127.0.0.1:3306
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:674:27)
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:71:39)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at requireAuth (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\auth.ts:26:5)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+[API]     at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17) {
+[API]   errno: -4078,
+[API]   code: 'ECONNREFUSED',
+[API]   syscall: 'connect',
+[API]   address: '127.0.0.1',
+[API]   port: 3306,
+[API]   fatal: true
+[API] }
+[API] Error: connect ECONNREFUSED 127.0.0.1:3306
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:646:27)
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:71:39)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+[API]     at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:295:15
+[API]     at processParams (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:582:12)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:291:5) {
+[API]   errno: -4078,
+[API]   code: 'ECONNREFUSED',
+[API]   syscall: 'connect',
+[API]   address: '127.0.0.1',
+[API]   port: 3306,
+[API]   fatal: true
+[API] }
+[API] Error: connect ECONNREFUSED 127.0.0.1:3306
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:646:27)
+[API]     at <anonymous> (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\server\index.ts:71:39)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:157:13)
+[API]     at Route.dispatch (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\route.js:117:3)
+[API]     at handle (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:435:11)
+[API]     at Layer.handleRequest (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\lib\layer.js:152:17)
+[API]     at C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:295:15
+[API]     at processParams (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:582:12)
+[API]     at next (C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\node_modules\router\index.js:291:5) {
+[API]   errno: -4078,
+[API]   code: 'ECONNREFUSED',
+[API]   syscall: 'connect',
+[API]   address: '127.0.0.1',
+[API]   port: 3306,
+[API]   fatal: true
+[API] }
+[WEB] [2m15:18:55[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: read ECONNRESET
+[WEB]     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[WEB] [2m15:18:55[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: read ECONNRESET
+[WEB]     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[WEB] [2m15:18:57[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:18:57[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:18:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:18:59[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:03[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:03[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:03[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:03[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:03[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/membership-plans?status=published&limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:04[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:04[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:04[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/membership-plans?status=published&limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:06[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:06[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/notifications?limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:10[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/student/dashboard[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:23[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/me[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:19:33[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:23:18[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] [2m15:23:45[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/membership-plans?status=published&limit=100[39m
+[WEB] Error: connect ECONNREFUSED 127.0.0.1:3001
+[WEB]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[WEB] npm run dev exited with code 3221226505
+--> Sending SIGTERM to other processes..
+[API] npm run dev:api exited with code 1

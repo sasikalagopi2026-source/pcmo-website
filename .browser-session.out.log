@@ -1,0 +1,18 @@
+
+> vite_react_shadcn_ts@0.0.0 dev
+> vite --host 127.0.0.1 --port 8080
+
+
+  VITE v5.4.21  ready in 1767 ms
+
+  ➜  Local:   http://127.0.0.1:8080/
+09:42:26 [vite] hmr update /src/pages/AdminResourceManager.tsx, /src/index.css
+09:42:26 [vite] hmr update /src/pages/AdminResourceManager.tsx, /src/index.css
+09:42:26 [vite] hmr update /src/App.tsx, /src/index.css
+09:42:28 [vite] hmr update /src/components/DashboardSidebar.tsx, /src/index.css
+09:44:21 [vite] hmr update /src/components/PublicNavigation.tsx, /src/index.css
+09:44:21 [vite] hmr update /src/components/PublicNavigation.tsx, /src/index.css
+09:44:32 [vite] hmr update /src/components/PublicNavigation.tsx, /src/index.css
+10:24:35 [vite] hmr update /src/components/PublicNavigation.tsx, /src/index.css
+10:24:36 [vite] hmr update /src/components/PublicNavigation.tsx, /src/index.css
+10:24:47 [vite] hmr update /src/components/PublicNavigation.tsx, /src/index.css

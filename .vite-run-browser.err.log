@@ -1,0 +1,72 @@
+[2m08:53:03[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/me[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m08:53:16[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m08:53:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m08:53:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m08:53:30[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:19[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:20[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/course-materials?course_id=15c98f26-6b20-492c-8fe2-fa88031ed50a&status=published&limit=100[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:20[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/course-assessments?course_id=15c98f26-6b20-492c-8fe2-fa88031ed50a&status=published&limit=100[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:20[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a/module-progress[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:20[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a/assessment-access[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:21[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:21[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/course-materials?course_id=15c98f26-6b20-492c-8fe2-fa88031ed50a&status=published&limit=100[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:21[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/course-assessments?course_id=15c98f26-6b20-492c-8fe2-fa88031ed50a&status=published&limit=100[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:21[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a/module-progress[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:21[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a/assessment-access[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:23[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:23[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/course-materials?course_id=15c98f26-6b20-492c-8fe2-fa88031ed50a&status=published&limit=100[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:23[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/resources/course-assessments?course_id=15c98f26-6b20-492c-8fe2-fa88031ed50a&status=published&limit=100[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:23[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a/module-progress[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:23[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/courses/15c98f26-6b20-492c-8fe2-fa88031ed50a/assessment-access[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:25[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/me[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:27[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[2m17:02:33[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/auth/login[39m
+Error: connect ECONNREFUSED 127.0.0.1:3001
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+[31mfailed to load config from C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\vite.config.ts[39m
+[2m17:26:45[22m [31m[1m[vite][22m[39m Cannot find package 'pcmo-tagger' imported from C:\Users\sasik\OneDrive\Desktop\PCMO - Copy\vite.config.ts.timestamp-1782394005063-189d74af79be9.mjs
+[2m17:26:45[22m [31m[1m[vite][22m[39m server restart failed

@@ -1,0 +1,37 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api"
+
+[WEB] 
+[WEB] > vite_react_shadcn_ts@0.0.0 dev
+[WEB] > vite
+[WEB] 
+[API] 
+[API] > vite_react_shadcn_ts@0.0.0 dev:api
+[API] > tsx watch server/index.ts
+[API] 
+[WEB] 
+[WEB]   VITE v5.4.21  ready in 979 ms
+[WEB] 
+[WEB]   ➜  Local:   http://localhost:8080/
+[WEB]   ➜  Network: http://192.168.0.153:8080/
+[API] node:events:487
+[API]       throw er; // Unhandled 'error' event
+[API]       ^
+[API] 
+[API] Error: listen EADDRINUSE: address already in use 127.0.0.1:3001
+[API]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[API]     at listenInCluster (node:net:2065:12)
+[API]     at node:net:2274:7
+[API]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[API] Emitted 'error' event on Server instance at:
+[API]     at emitErrorNT (node:net:2044:8)
+[API]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[API]   code: 'EADDRINUSE',
+[API]   errno: -4091,
+[API]   syscall: 'listen',
+[API]   address: '127.0.0.1',
+[API]   port: 3001
+[API] }
+[API] 
+[API] Node.js v24.15.0

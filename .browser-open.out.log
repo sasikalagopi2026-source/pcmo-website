@@ -1,0 +1,50 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently -k -n WEB,API -c cyan,green "npm:dev" "npm:dev:api" --host 127.0.0.1
+
+[API] 
+[API] > vite_react_shadcn_ts@0.0.0 dev:api
+[API] > tsx watch server/index.ts
+[API] 
+[WEB] 
+[WEB] > vite_react_shadcn_ts@0.0.0 dev
+[WEB] > vite
+[WEB] 
+[WEB] Port 8080 is in use, trying another one...
+[WEB] Port 8081 is in use, trying another one...
+[WEB] 
+[WEB]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m2469[22m[2m[0m ms[22m
+[WEB] 
+[WEB]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m8082[22m/[39m
+[WEB]   [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.0.153:[1m8082[22m/[39m
+[API] node:events:487
+[API]       throw er; // Unhandled 'error' event
+[API]       ^
+[API] 
+[API] Error: listen EADDRINUSE: address already in use 127.0.0.1:3001
+[API]     at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+[API]     at listenInCluster (node:net:2065:12)
+[API]     at node:net:2274:7
+[API]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[API] Emitted 'error' event on Server instance at:
+[API]     at emitErrorNT (node:net:2044:8)
+[API]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+[API]   code: 'EADDRINUSE',
+[API]   errno: -4091,
+[API]   syscall: 'listen',
+[API]   address: '127.0.0.1',
+[API]   port: 3001
+[API] }
+[API] 
+[API] Node.js v24.15.0
+[WEB] [2m15:53:13[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[WEB] [2m15:53:14[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/PublicFooter.tsx, /src/index.css[22m
+[WEB] [2m15:53:14[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/PublicFooter.tsx, /src/index.css[22m
+[WEB] [2m15:54:36[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[WEB] [2m15:56:02[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PcmoSitemapPage.tsx, /src/index.css[22m
+[WEB] [2m15:56:02[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PcmoSitemapPage.tsx, /src/index.css[22m
+[WEB] [2m15:58:05[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PcmoSitemapPage.tsx, /src/index.css[22m
+[WEB] [2m15:58:05[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PcmoSitemapPage.tsx, /src/index.css[22m
+[API] npm run dev:api exited with code 1073807364
+--> Sending SIGTERM to other processes..
+[WEB] npm run dev exited with code 1073807364

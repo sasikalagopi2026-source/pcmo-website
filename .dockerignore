@@ -1,0 +1,14 @@
+node_modules
+dist
+server-dist
+.git
+.env
+.env.*
+!.env.example
+.mysql
+.render-tmp
+.server-build
+.recovery-backups
+output
+tmp
+*.log

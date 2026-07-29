@@ -1,0 +1,13 @@
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-01.png'
+duration 17.782
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-02.png'
+duration 17.782
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-03.png'
+duration 17.782
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-04.png'
+duration 17.782
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-05.png'
+duration 17.782
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-06.png'
+duration 17.782
+file 'C:/Users/sasik/OneDrive/Desktop/PCMO - Copy/tmp/webinar-series-1/06-risk-management-that-works/slide-06.png'
