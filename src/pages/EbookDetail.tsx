@@ -96,9 +96,24 @@ const EbookDetail = () => {
 
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
-      setMessage("Payment received. Your book will unlock once Stripe confirmation is processed.");
-      void queryClient.invalidateQueries({ queryKey: ["book-access", id] });
-      void queryClient.invalidateQueries({ queryKey: ["book-purchases"] });
+      const sessionId = searchParams.get("session_id") || searchParams.get("sessionId");
+      if (sessionId) {
+        (async () => {
+          try {
+            setMessage("Payment received. Unlocking your book...");
+            await api("/api/stripe/confirm-session", { method: "POST", body: JSON.stringify({ sessionId }) });
+          } catch (err) {
+            setMessage("Payment received. Your book will unlock once Stripe confirmation is processed.");
+          } finally {
+            void queryClient.invalidateQueries({ queryKey: ["book-access", id] });
+            void queryClient.invalidateQueries({ queryKey: ["book-purchases"] });
+          }
+        })();
+      } else {
+        setMessage("Payment received. Your book will unlock once Stripe confirmation is processed.");
+        void queryClient.invalidateQueries({ queryKey: ["book-access", id] });
+        void queryClient.invalidateQueries({ queryKey: ["book-purchases"] });
+      }
     }
     if (searchParams.get("payment") === "cancelled") {
       setMessage("Payment was cancelled. The book was not added to your library.");

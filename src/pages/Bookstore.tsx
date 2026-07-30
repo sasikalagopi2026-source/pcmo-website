@@ -25,7 +25,24 @@ const Bookstore = () => {
     onSuccess: (result) => { if (result.checkoutUrl) window.location.href = result.checkoutUrl; },
   });
   useEffect(() => {
-    if (params.get("payment") === "success") { void client.invalidateQueries({ queryKey: ["book-cart"] }); void client.invalidateQueries({ queryKey: ["book-purchases"] }); }
+    if (params.get("payment") === "success") {
+      const sessionId = params.get("session_id") || params.get("sessionId");
+      if (sessionId) {
+        (async () => {
+          try {
+            await api("/api/stripe/confirm-session", { method: "POST", body: JSON.stringify({ sessionId }) });
+          } catch (err) {
+            // ignore, webhook will reconcile
+          } finally {
+            void client.invalidateQueries({ queryKey: ["book-cart"] });
+            void client.invalidateQueries({ queryKey: ["book-purchases"] });
+          }
+        })();
+      } else {
+        void client.invalidateQueries({ queryKey: ["book-cart"] });
+        void client.invalidateQueries({ queryKey: ["book-purchases"] });
+      }
+    }
   }, [client, params]);
 
   const owned = new Set((purchases.data ?? []).map((purchase) => purchase.book_id));

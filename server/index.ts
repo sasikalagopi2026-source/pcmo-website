@@ -829,6 +829,35 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
 
 app.use(express.json({ limit: "5mb" }));
 
+app.post("/api/stripe/confirm-session", requireAuth, asyncRoute(async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: "Stripe is not configured" });
+  const sessionId = String(req.body.sessionId ?? req.query.session_id ?? req.query.sessionId ?? "").trim();
+  if (!sessionId) return res.status(400).json({ error: "Missing sessionId" });
+  // retrieve session with expanded payment info
+  const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["payment_intent", "customer"] }) as Stripe.Checkout.Session;
+  if (!session) return res.status(404).json({ error: "Stripe session not found" });
+
+  // Security: only allow the owner or an admin to confirm
+  const ownerId = session.metadata?.userId as string | undefined;
+  const ownerEmail = session.customer_details?.email as string | undefined;
+  if (!isAdminRole(req.user!.role)) {
+    if (ownerId && ownerId !== req.user!.id) return res.status(403).json({ error: "Not authorized to confirm this session" });
+    if (ownerEmail && ownerEmail.toLowerCase() !== String(req.user!.email ?? "").toLowerCase()) return res.status(403).json({ error: "Not authorized to confirm this session" });
+  }
+
+  // Call the same activation handlers the webhook uses (idempotent)
+  try {
+    if (session.metadata?.checkoutType === "book") await activateStripeBookPurchase(session);
+    else if (session.metadata?.checkoutType === "book-cart") await activateStripeBookCartPurchase(session);
+    else await activateStripeMembership(session);
+  } catch (err) {
+    // don't fail the request if activation throws; webhook will still reconcile
+    console.error("confirm-session activation error", err);
+  }
+
+  res.json({ success: true, sessionId });
+}));
+
 app.get("/api/pages/:slug", asyncRoute(async (req, res) => {
   const [rows] = await db.execute<RowDataPacket[]>(
     "SELECT * FROM website_pages WHERE slug = ? AND status = 'published' LIMIT 1",
