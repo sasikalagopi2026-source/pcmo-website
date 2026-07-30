@@ -1959,6 +1959,53 @@ app.delete("/api/admin/contact-messages/:id", requireAuth, requireAdmin, asyncRo
   res.status(204).end();
 }));
 
+app.post("/api/admin/refunds", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: "Stripe is not configured" });
+  const input = z.object({ invoiceId: z.string().min(1).optional(), invoiceNumber: z.string().optional(), amount: z.number().min(0).optional(), reason: z.string().max(255).optional() }).refine((v) => v.invoiceId || v.invoiceNumber, "Provide invoiceId or invoiceNumber").parse(req.body);
+
+  const [invoiceRows] = input.invoiceId
+    ? await db.execute<RowDataPacket[]>("SELECT * FROM invoices WHERE id = ? LIMIT 1", [input.invoiceId])
+    : await db.execute<RowDataPacket[]>("SELECT * FROM invoices WHERE invoice_number = ? LIMIT 1", [input.invoiceNumber]);
+  const invoice = invoiceRows[0];
+  if (!invoice) return res.status(404).json({ error: "Invoice not found" });
+  if (String(invoice.status) !== 'paid') return res.status(400).json({ error: "Only paid invoices can be refunded" });
+  const paymentIntent = invoice.stripe_payment_intent_id;
+  if (!paymentIntent) return res.status(400).json({ error: "Invoice has no Stripe payment intent" });
+
+  const amountToRefund = typeof input.amount === 'number' ? input.amount : Number(invoice.amount ?? 0);
+  const amountCents = Math.max(0, Math.round(amountToRefund * 100));
+  if (amountCents <= 0) return res.status(400).json({ error: "Invalid refund amount" });
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+    const refund = await stripe.refunds.create({ payment_intent: paymentIntent, amount: amountCents, metadata: { invoice_id: invoice.id } });
+
+    const refundId = randomUUID();
+    await connection.execute(
+      `INSERT INTO refunds (id, invoice_id, user_id, amount, currency, status, stripe_refund_id, stripe_charge_id, reason, processed_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [refundId, invoice.id, invoice.user_id, (amountCents / 100).toFixed(2), invoice.currency ?? 'USD', refund.status ?? 'succeeded', refund.id, refund.charge ?? null, input.reason ?? null, req.user!.id],
+    );
+
+    // Update invoice status: fully refunded or partially_refunded
+    const originalAmount = Number(invoice.amount ?? 0);
+    if (Math.abs(originalAmount - (amountCents / 100)) < 0.005) {
+      await connection.execute("UPDATE invoices SET status = 'refunded' WHERE id = ?", [invoice.id]);
+    } else {
+      await connection.execute("UPDATE invoices SET status = 'partially_refunded' WHERE id = ?", [invoice.id]);
+    }
+
+    await connection.commit();
+    res.status(201).json({ id: refundId, stripe_refund: refund });
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}));
+
 app.post("/api/community/posts/:id/like", requireAuth, asyncRoute(async (req, res) => {
   await db.execute("UPDATE community_posts SET likes = likes + 1 WHERE id = ?", [routeParam(req.params.id)]);
   await trackMemberActivity(req.user!.id, "community_like", "community_posts", routeParam(req.params.id));

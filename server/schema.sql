@@ -463,6 +463,23 @@ ALTER TABLE invoices ADD COLUMN IF NOT EXISTS stripe_checkout_session_id VARCHAR
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS stripe_invoice_id VARCHAR(255);
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS stripe_payment_intent_id VARCHAR(255);
 
+CREATE TABLE IF NOT EXISTS refunds (
+  id CHAR(36) PRIMARY KEY,
+  invoice_id CHAR(36),
+  user_id CHAR(36) NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  currency CHAR(3) NOT NULL DEFAULT 'USD',
+  status ENUM('pending','succeeded','failed') NOT NULL DEFAULT 'pending',
+  stripe_refund_id VARCHAR(255),
+  stripe_charge_id VARCHAR(255),
+  reason VARCHAR(255),
+  processed_by CHAR(36),
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_refunds_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_refunds_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS notifications (
   id CHAR(36) PRIMARY KEY,
   user_id CHAR(36) NOT NULL,
