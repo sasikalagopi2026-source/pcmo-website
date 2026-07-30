@@ -23,6 +23,7 @@ export const useRealtime = () => {
       "invoices:changed",
       "notifications:changed",
       "library:changed",
+      "book-purchases:changed",
       "volunteer-opportunities:changed",
       "admin-modules:changed",
       "admin-records:changed",
