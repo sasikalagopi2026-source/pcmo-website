@@ -21,6 +21,7 @@ import { requireAdmin, requireAuth, signToken } from "./auth.js";
 import { config } from "./config.js";
 import { db, pingDatabase } from "./db.js";
 import { jsonFields, resources } from "./resources.js";
+import { buildPurchaseConfirmationEmailPayload, buildWelcomeEmailPayload } from "./email.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -440,6 +441,82 @@ const sendEmailNotification = async (userId: string, title: string, message: str
   });
 };
 
+const sendEmailToAddress = async (toAddress: string, subject: string, text: string, html: string) => {
+  if (!emailTransport) {
+    console.log("Email transport not configured. Skipping email notification.");
+    return;
+  }
+
+  await emailTransport.sendMail({
+    from: config.email.fromAddress,
+    to: toAddress,
+    subject,
+    text,
+    html,
+  });
+};
+
+const sendWelcomeEmail = async (userId: string, displayName: string) => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    `SELECT u.email, COALESCE(p.display_name, u.email) display_name
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id = ?
+     LIMIT 1`,
+    [userId],
+  );
+  const recipient = rows[0];
+  if (!recipient?.email) return;
+
+  const payload = buildWelcomeEmailPayload({
+    displayName: displayName || recipient.display_name || recipient.email,
+    supportEmail: config.email.fromAddress,
+  });
+
+  await sendEmailToAddress(recipient.email, payload.subject, payload.text, payload.html);
+};
+
+const sendPurchaseConfirmationEmail = async ({
+  userId,
+  displayName,
+  itemName,
+  amount,
+  currency,
+  orderNumber,
+  receiptNumber,
+}: {
+  userId: string;
+  displayName: string;
+  itemName: string;
+  amount: number;
+  currency: string;
+  orderNumber: string;
+  receiptNumber: string;
+}) => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    `SELECT u.email, COALESCE(p.display_name, u.email) display_name
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id = ?
+     LIMIT 1`,
+    [userId],
+  );
+  const recipient = rows[0];
+  if (!recipient?.email) return;
+
+  const payload = buildPurchaseConfirmationEmailPayload({
+    displayName: displayName || recipient.display_name || recipient.email,
+    itemName,
+    amount,
+    currency,
+    orderNumber,
+    receiptNumber,
+    supportEmail: config.email.fromAddress,
+  });
+
+  await sendEmailToAddress(recipient.email, payload.subject, payload.text, payload.html);
+};
+
 const sendWhatsappNotification = async (userId: string, title: string, message: string, actionUrl?: string) => {
   if (!twilioClient || !config.twilio.whatsappFrom) {
     console.log("WhatsApp client not configured. Skipping WhatsApp notification.");
@@ -727,6 +804,15 @@ const activateStripeMembership = async (session: Stripe.Checkout.Session) => {
     stripeSubscriptionId,
     stripePaymentIntentId,
   });
+  await sendPurchaseConfirmationEmail({
+    userId,
+    displayName: session.metadata?.planName ?? "member",
+    itemName: planName,
+    amount: Number(session.amount_total ?? 0) / 100,
+    currency: String(session.currency ?? "usd").toUpperCase(),
+    orderNumber: session.id,
+    receiptNumber: `STRIPE-${session.id}`,
+  });
   io.to(`user:${userId}`).emit("membership:changed", { membershipId: finalMembershipId, status: "active" });
   io.to(`user:${userId}`).emit("subscriptions:changed", { subscriptionId, status: "active" });
 };
@@ -773,6 +859,15 @@ const activateStripeBookPurchase = async (session: Stripe.Checkout.Session) => {
     connection.release();
   }
   await audit(userId, "stripe_checkout_completed", "book-purchases", purchaseId, { sessionId: session.id, bookId });
+  await sendPurchaseConfirmationEmail({
+    userId,
+    displayName: session.metadata?.bookTitle ?? "member",
+    itemName: session.metadata?.bookTitle ?? "PCMO book",
+    amount,
+    currency,
+    orderNumber: session.id,
+    receiptNumber: `BOOK-${session.id}`,
+  });
   await trackMemberActivity(userId, "book_purchase_completed", "library_contents", bookId, { purchaseId, amount, currency });
   io.to(`user:${userId}`).emit("book-purchases:changed", { purchaseId, bookId, status: "paid" });
 };
@@ -810,6 +905,15 @@ const activateStripeBookCartPurchase = async (session: Stripe.Checkout.Session) 
     connection.release();
   }
   await audit(userId, "stripe_checkout_completed", "book-purchases", undefined, { sessionId: session.id, purchaseIds: ids });
+  await sendPurchaseConfirmationEmail({
+    userId,
+    displayName: session.metadata?.bookTitle ?? "member",
+    itemName: "PCMO bookstore order",
+    amount,
+    currency,
+    orderNumber: session.id,
+    receiptNumber: `BOOK-CART-${session.id}`,
+  });
   io.to(`user:${userId}`).emit("book-purchases:changed", { purchaseIds: ids, status: "paid" });
 };
 
@@ -1087,6 +1191,7 @@ app.post("/api/auth/register", asyncRoute(async (req, res) => {
     connection.release();
   }
   const user = { id, email, role: "student" as const };
+  await sendWelcomeEmail(id, input.displayName);
   res.status(201).json({ token: signToken(user), user });
 }));
 
@@ -1994,7 +2099,7 @@ app.post("/api/admin/refunds", requireAuth, requireAdmin, asyncRoute(async (req,
 
   const [invoiceRows] = input.invoiceId
     ? await db.execute<RowDataPacket[]>("SELECT * FROM invoices WHERE id = ? LIMIT 1", [input.invoiceId])
-    : await db.execute<RowDataPacket[]>("SELECT * FROM invoices WHERE invoice_number = ? LIMIT 1", [input.invoiceNumber]);
+    : await db.execute<RowDataPacket[]>("SELECT * FROM invoices WHERE invoice_number = ? LIMIT 1", [input.invoiceNumber ?? ""]);
   const invoice = invoiceRows[0];
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
   if (String(invoice.status) !== 'paid') return res.status(400).json({ error: "Only paid invoices can be refunded" });
