@@ -104,6 +104,12 @@ export const resources = {
         searchable: ["invoice_number", "description", "status"],
         ownerField: "user_id",
     },
+    refunds: {
+        table: "refunds",
+        fields: ["invoice_id", "user_id", "amount", "currency", "status", "stripe_refund_id", "stripe_charge_id", "reason", "processed_by", "created_at"],
+        searchable: ["stripe_refund_id", "stripe_charge_id", "status"],
+        ownerField: "user_id",
+    },
     notifications: {
         table: "notifications",
         fields: ["user_id", "title", "message", "type", "read_at", "action_url"],

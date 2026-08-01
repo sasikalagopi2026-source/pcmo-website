@@ -19,6 +19,7 @@ import { requireAdmin, requireAuth, signToken } from "./auth.js";
 import { config } from "./config.js";
 import { db, pingDatabase } from "./db.js";
 import { jsonFields, resources } from "./resources.js";
+import { buildPurchaseConfirmationEmailPayload, buildWelcomeEmailPayload } from "./email.js";
 const app = express();
 const httpServer = createServer(app);
 const io = new SocketServer(httpServer, { cors: { origin: config.clientOrigins } });
@@ -368,6 +369,54 @@ const sendEmailNotification = async (userId, title, message, actionUrl) => {
         html: htmlBody,
     });
 };
+const sendEmailToAddress = async (toAddress, subject, text, html) => {
+    if (!emailTransport) {
+        console.log("Email transport not configured. Skipping email notification.");
+        return;
+    }
+    await emailTransport.sendMail({
+        from: config.email.fromAddress,
+        to: toAddress,
+        subject,
+        text,
+        html,
+    });
+};
+const sendWelcomeEmail = async (userId, displayName) => {
+    const [rows] = await db.execute(`SELECT u.email, COALESCE(p.display_name, u.email) display_name
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id = ?
+     LIMIT 1`, [userId]);
+    const recipient = rows[0];
+    if (!recipient?.email)
+        return;
+    const payload = buildWelcomeEmailPayload({
+        displayName: displayName || recipient.display_name || recipient.email,
+        supportEmail: config.email.fromAddress,
+    });
+    await sendEmailToAddress(recipient.email, payload.subject, payload.text, payload.html);
+};
+const sendPurchaseConfirmationEmail = async ({ userId, displayName, itemName, amount, currency, orderNumber, receiptNumber, }) => {
+    const [rows] = await db.execute(`SELECT u.email, COALESCE(p.display_name, u.email) display_name
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id = ?
+     LIMIT 1`, [userId]);
+    const recipient = rows[0];
+    if (!recipient?.email)
+        return;
+    const payload = buildPurchaseConfirmationEmailPayload({
+        displayName: displayName || recipient.display_name || recipient.email,
+        itemName,
+        amount,
+        currency,
+        orderNumber,
+        receiptNumber,
+        supportEmail: config.email.fromAddress,
+    });
+    await sendEmailToAddress(recipient.email, payload.subject, payload.text, payload.html);
+};
 const sendWhatsappNotification = async (userId, title, message, actionUrl) => {
     if (!twilioClient || !config.twilio.whatsappFrom) {
         console.log("WhatsApp client not configured. Skipping WhatsApp notification.");
@@ -581,6 +630,15 @@ const activateStripeMembership = async (session) => {
         stripeSubscriptionId,
         stripePaymentIntentId,
     });
+    await sendPurchaseConfirmationEmail({
+        userId,
+        displayName: session.metadata?.planName ?? "member",
+        itemName: planName,
+        amount: Number(session.amount_total ?? 0) / 100,
+        currency: String(session.currency ?? "usd").toUpperCase(),
+        orderNumber: session.id,
+        receiptNumber: `STRIPE-${session.id}`,
+    });
     io.to(`user:${userId}`).emit("membership:changed", { membershipId: finalMembershipId, status: "active" });
     io.to(`user:${userId}`).emit("subscriptions:changed", { subscriptionId, status: "active" });
 };
@@ -622,6 +680,15 @@ const activateStripeBookPurchase = async (session) => {
         connection.release();
     }
     await audit(userId, "stripe_checkout_completed", "book-purchases", purchaseId, { sessionId: session.id, bookId });
+    await sendPurchaseConfirmationEmail({
+        userId,
+        displayName: session.metadata?.bookTitle ?? "member",
+        itemName: session.metadata?.bookTitle ?? "PCMO book",
+        amount,
+        currency,
+        orderNumber: session.id,
+        receiptNumber: `BOOK-${session.id}`,
+    });
     await trackMemberActivity(userId, "book_purchase_completed", "library_contents", bookId, { purchaseId, amount, currency });
     io.to(`user:${userId}`).emit("book-purchases:changed", { purchaseId, bookId, status: "paid" });
 };
@@ -659,6 +726,15 @@ const activateStripeBookCartPurchase = async (session) => {
         connection.release();
     }
     await audit(userId, "stripe_checkout_completed", "book-purchases", undefined, { sessionId: session.id, purchaseIds: ids });
+    await sendPurchaseConfirmationEmail({
+        userId,
+        displayName: session.metadata?.bookTitle ?? "member",
+        itemName: "PCMO bookstore order",
+        amount,
+        currency,
+        orderNumber: session.id,
+        receiptNumber: `BOOK-CART-${session.id}`,
+    });
     io.to(`user:${userId}`).emit("book-purchases:changed", { purchaseIds: ids, status: "paid" });
 };
 app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), asyncRoute(async (req, res) => {
@@ -680,6 +756,40 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
     res.json({ received: true });
 }));
 app.use(express.json({ limit: "5mb" }));
+app.post("/api/stripe/confirm-session", requireAuth, asyncRoute(async (req, res) => {
+    if (!stripe)
+        return res.status(503).json({ error: "Stripe is not configured" });
+    const sessionId = String(req.body.sessionId ?? req.query.session_id ?? req.query.sessionId ?? "").trim();
+    if (!sessionId)
+        return res.status(400).json({ error: "Missing sessionId" });
+    // retrieve session with expanded payment info
+    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["payment_intent", "customer"] });
+    if (!session)
+        return res.status(404).json({ error: "Stripe session not found" });
+    // Security: only allow the owner or an admin to confirm
+    const ownerId = session.metadata?.userId;
+    const ownerEmail = session.customer_details?.email;
+    if (!isAdminRole(req.user.role)) {
+        if (ownerId && ownerId !== req.user.id)
+            return res.status(403).json({ error: "Not authorized to confirm this session" });
+        if (ownerEmail && ownerEmail.toLowerCase() !== String(req.user.email ?? "").toLowerCase())
+            return res.status(403).json({ error: "Not authorized to confirm this session" });
+    }
+    // Call the same activation handlers the webhook uses (idempotent)
+    try {
+        if (session.metadata?.checkoutType === "book")
+            await activateStripeBookPurchase(session);
+        else if (session.metadata?.checkoutType === "book-cart")
+            await activateStripeBookCartPurchase(session);
+        else
+            await activateStripeMembership(session);
+    }
+    catch (err) {
+        // don't fail the request if activation throws; webhook will still reconcile
+        console.error("confirm-session activation error", err);
+    }
+    res.json({ success: true, sessionId });
+}));
 app.get("/api/pages/:slug", asyncRoute(async (req, res) => {
     const [rows] = await db.execute("SELECT * FROM website_pages WHERE slug = ? AND status = 'published' LIMIT 1", [routeParam(req.params.slug)]);
     if (!rows[0])
@@ -869,6 +979,7 @@ app.post("/api/auth/register", asyncRoute(async (req, res) => {
         connection.release();
     }
     const user = { id, email, role: "student" };
+    await sendWelcomeEmail(id, input.displayName);
     res.status(201).json({ token: signToken(user), user });
 }));
 app.post("/api/auth/login", asyncRoute(async (req, res) => {
@@ -1585,6 +1696,51 @@ app.put("/api/admin/contact-messages/:id", requireAuth, requireAdmin, asyncRoute
 app.delete("/api/admin/contact-messages/:id", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
     await db.execute("DELETE FROM contact_messages WHERE id = ?", [routeParam(req.params.id)]);
     res.status(204).end();
+}));
+app.post("/api/admin/refunds", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
+    if (!stripe)
+        return res.status(503).json({ error: "Stripe is not configured" });
+    const input = z.object({ invoiceId: z.string().min(1).optional(), invoiceNumber: z.string().optional(), amount: z.number().min(0).optional(), reason: z.string().max(255).optional() }).refine((v) => v.invoiceId || v.invoiceNumber, "Provide invoiceId or invoiceNumber").parse(req.body);
+    const [invoiceRows] = input.invoiceId
+        ? await db.execute("SELECT * FROM invoices WHERE id = ? LIMIT 1", [input.invoiceId])
+        : await db.execute("SELECT * FROM invoices WHERE invoice_number = ? LIMIT 1", [input.invoiceNumber ?? ""]);
+    const invoice = invoiceRows[0];
+    if (!invoice)
+        return res.status(404).json({ error: "Invoice not found" });
+    if (String(invoice.status) !== 'paid')
+        return res.status(400).json({ error: "Only paid invoices can be refunded" });
+    const paymentIntent = invoice.stripe_payment_intent_id;
+    if (!paymentIntent)
+        return res.status(400).json({ error: "Invoice has no Stripe payment intent" });
+    const amountToRefund = typeof input.amount === 'number' ? input.amount : Number(invoice.amount ?? 0);
+    const amountCents = Math.max(0, Math.round(amountToRefund * 100));
+    if (amountCents <= 0)
+        return res.status(400).json({ error: "Invalid refund amount" });
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        const refund = await stripe.refunds.create({ payment_intent: paymentIntent, amount: amountCents, metadata: { invoice_id: invoice.id } });
+        const refundId = randomUUID();
+        await connection.execute(`INSERT INTO refunds (id, invoice_id, user_id, amount, currency, status, stripe_refund_id, stripe_charge_id, reason, processed_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [refundId, invoice.id, invoice.user_id, (amountCents / 100).toFixed(2), invoice.currency ?? 'USD', refund.status ?? 'succeeded', refund.id, refund.charge ?? null, input.reason ?? null, req.user.id]);
+        // Update invoice status: fully refunded or partially_refunded
+        const originalAmount = Number(invoice.amount ?? 0);
+        if (Math.abs(originalAmount - (amountCents / 100)) < 0.005) {
+            await connection.execute("UPDATE invoices SET status = 'refunded' WHERE id = ?", [invoice.id]);
+        }
+        else {
+            await connection.execute("UPDATE invoices SET status = 'partially_refunded' WHERE id = ?", [invoice.id]);
+        }
+        await connection.commit();
+        res.status(201).json({ id: refundId, stripe_refund: refund });
+    }
+    catch (error) {
+        await connection.rollback();
+        throw error;
+    }
+    finally {
+        connection.release();
+    }
 }));
 app.post("/api/community/posts/:id/like", requireAuth, asyncRoute(async (req, res) => {
     await db.execute("UPDATE community_posts SET likes = likes + 1 WHERE id = ?", [routeParam(req.params.id)]);
