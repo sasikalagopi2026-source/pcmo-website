@@ -324,6 +324,73 @@ const getAssessmentAccess = async (userId: string, courseId: string) => {
   };
 };
 
+const hasActiveCertificate = async (userId: string, courseId: string) => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    "SELECT 1 FROM certifications WHERE user_id = ? AND course_id = ? AND status = 'active' LIMIT 1",
+    [userId, courseId],
+  );
+  return Boolean(rows[0]);
+};
+
+const shuffleArray = <T>(items: T[]) => {
+  const array = [...items];
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
+const getAssessmentConfig = async (courseId: string) => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    `SELECT id, title, instructions, passing_score, max_attempts
+     FROM course_assessments
+     WHERE course_id = ? AND status = 'published'
+     ORDER BY sort_order ASC
+     LIMIT 1`,
+    [courseId],
+  );
+  const assessment = rows[0];
+  const timerQuery = async () => {
+    try {
+      const [timerRows] = await db.execute<RowDataPacket[]>(
+        `SELECT timer_minutes FROM course_assessments
+         WHERE course_id = ? AND status = 'published'
+         ORDER BY sort_order ASC
+         LIMIT 1`,
+        [courseId],
+      );
+      const timerValue = timerRows[0]?.timer_minutes;
+      return timerValue != null ? Number(timerValue) : 30;
+    } catch {
+      return 30;
+    }
+  };
+
+  return {
+    id: assessment?.id ?? null,
+    title: assessment?.title ?? "Certification Assessment",
+    instructions: assessment?.instructions ?? "Complete the quiz to earn your certificate.",
+    passing_score: Number(assessment?.passing_score ?? 70),
+    max_attempts: Number(assessment?.max_attempts ?? 3),
+    timer_minutes: await timerQuery(),
+  };
+};
+
+const getQuizAttemptInfo = async (userId: string, courseId: string, maxAttempts: number) => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    "SELECT COUNT(*) count FROM quiz_attempts WHERE user_id = ? AND course_id = ?",
+    [userId, courseId],
+  );
+  const usedAttempts = Number(rows[0]?.count ?? 0);
+  return {
+    usedAttempts,
+    attemptNumber: usedAttempts + 1,
+    remainingAttempts: Math.max(0, maxAttempts - usedAttempts),
+    maxAttempts,
+  };
+};
+
 const audit = async (userId: string | undefined, action: string, resource: string, resourceId?: string, details?: unknown) => {
   await db.execute(
     "INSERT INTO audit_logs (id, user_id, action, resource, resource_id, details) VALUES (?, ?, ?, ?, ?, ?)",
@@ -1598,12 +1665,13 @@ app.delete("/api/courses/:id/enroll", requireAuth, asyncRoute(async (req, res) =
 app.get("/api/courses", requireAuth, asyncRoute(async (req, res) => {
   await syncCertifiedCourseCompletions(req.user!.id);
   const [rows] = await db.execute<RowDataPacket[]>(
-    `SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at
+    `SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at,
+      COALESCE((SELECT 1 FROM certifications cert WHERE cert.user_id = ? AND cert.course_id = c.id AND cert.status = 'active' LIMIT 1), 0) has_certificate
      FROM courses c
      LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
      WHERE c.status = 'published'
      ORDER BY c.updated_at DESC`,
-    [req.user!.id],
+    [req.user!.id, req.user!.id],
   );
   res.json(rows.map(parseJsonFields));
 }));
@@ -1615,12 +1683,13 @@ app.get("/api/courses/:id", requireAuth, asyncRoute(async (req, res) => {
     `SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at,
       (SELECT COUNT(*) FROM quiz_questions qq WHERE qq.course_id = c.id AND qq.active = TRUE) quiz_question_count,
       (SELECT COUNT(*) FROM course_materials cm WHERE cm.course_id = c.id AND cm.status = 'published') module_count,
-      (SELECT COUNT(*) FROM course_module_progress cmp WHERE cmp.course_id = c.id AND cmp.user_id = ?) completed_module_count
+      (SELECT COUNT(*) FROM course_module_progress cmp WHERE cmp.course_id = c.id AND cmp.user_id = ?) completed_module_count,
+      COALESCE((SELECT 1 FROM certifications cert WHERE cert.user_id = ? AND cert.course_id = c.id AND cert.status = 'active' LIMIT 1), 0) has_certificate
      FROM courses c
      LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
      WHERE c.id = ?
      LIMIT 1`,
-    [req.user!.id, req.user!.id, courseId],
+    [req.user!.id, req.user!.id, req.user!.id, courseId],
   );
   const course = rows[0];
   if (!course) return res.status(404).json({ error: "Course not found" });
@@ -1686,11 +1755,31 @@ app.get("/api/courses/:id/module-progress", requireAuth, asyncRoute(async (req, 
 app.get("/api/courses/:id/assessment-access", requireAuth, asyncRoute(async (req, res) => {
   const courseId = routeParam(req.params.id);
   const access = await getAssessmentAccess(req.user!.id, courseId);
-  res.json(access);
+  const hasCertificate = await hasActiveCertificate(req.user!.id, courseId);
+  const assessment = await getAssessmentConfig(courseId);
+  const attemptInfo = await getQuizAttemptInfo(req.user!.id, courseId, assessment.max_attempts);
+  const unlocked = !hasCertificate && access.unlocked && attemptInfo.remainingAttempts > 0;
+  let lockedReason: string | undefined;
+  if (hasCertificate) {
+    lockedReason = "A certificate has already been issued for this course.";
+  } else if (!access.unlocked) {
+    lockedReason = `Complete all learning materials before opening the assessment (${access.completedMaterials}/${access.totalMaterials} completed)`;
+  } else if (attemptInfo.remainingAttempts <= 0) {
+    lockedReason = "You have reached the maximum number of assessment attempts for this course.";
+  }
+  res.json({
+    ...access,
+    unlocked,
+    hasCertificate,
+    assessment,
+    attemptInfo,
+    lockedReason,
+  });
 }));
 
 app.get("/api/courses/:id/quiz", requireAuth, asyncRoute(async (req, res) => {
   const courseId = routeParam(req.params.id);
+  const assessment = await getAssessmentConfig(courseId);
   if (!["admin", "super_admin"].includes(req.user!.role)) {
     const [enrollments] = await db.execute<RowDataPacket[]>(
       "SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? AND status IN ('active', 'completed') LIMIT 1",
@@ -1699,25 +1788,75 @@ app.get("/api/courses/:id/quiz", requireAuth, asyncRoute(async (req, res) => {
     if (!enrollments[0]) {
       return res.status(403).json({ error: "Enroll in this course before taking its assessment" });
     }
+    const hasCertificate = await hasActiveCertificate(req.user!.id, courseId);
+    if (hasCertificate) {
+      return res.status(403).json({ error: "Assessment access is disabled after your certificate has been issued. View your certificate instead." });
+    }
     const access = await getAssessmentAccess(req.user!.id, courseId);
+    const attemptInfo = await getQuizAttemptInfo(req.user!.id, courseId, assessment.max_attempts);
     if (!access.unlocked) {
       return res.status(403).json({
         error: `Complete all learning materials before opening the assessment (${access.completedMaterials}/${access.totalMaterials} completed)`,
         prerequisite: access,
       });
     }
+    if (attemptInfo.remainingAttempts <= 0) {
+      return res.status(403).json({
+        error: "You have reached the maximum number of assessment attempts for this course.",
+        attemptInfo,
+      });
+    }
   }
+
   const [rows] = await db.execute<RowDataPacket[]>(
     `SELECT id, course_id, module_index, question_text, options, explanation, sort_order
      FROM quiz_questions WHERE course_id = ? AND active = TRUE ORDER BY module_index, sort_order`,
     [courseId],
   );
-  res.json(rows.map(parseJsonFields));
+
+  const parseQuestionOptions = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed.filter((item): item is string => typeof item === "string");
+      } catch {
+        // fallback to simple delimiter parsing for legacy or malformed data
+      }
+      return value.split("|").map((item) => item.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  const questions = shuffleArray(rows.map(parseJsonFields))
+    .map((question) => {
+      const options = parseQuestionOptions(question.options);
+      return {
+        id: question.id,
+        course_id: question.course_id,
+        module_index: question.module_index,
+        question_text: question.question_text,
+        options: shuffleArray(options),
+        explanation: question.explanation,
+      };
+    })
+    .filter((question) => question.options.length > 0 && question.question_text);
+
+  const attemptInfo = await getQuizAttemptInfo(req.user!.id, courseId, assessment.max_attempts);
+  res.json({
+    assessment: {
+      ...assessment,
+      totalQuestions: questions.length,
+    },
+    questions,
+    attemptInfo,
+  });
 }));
 
 app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res) => {
   const input = z.object({ answers: z.record(z.string(), z.string()) }).parse(req.body);
   const courseId = routeParam(req.params.id);
+  const assessment = await getAssessmentConfig(courseId);
   if (!["admin", "super_admin"].includes(req.user!.role)) {
     const [enrollments] = await db.execute<RowDataPacket[]>(
       "SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? AND status IN ('active', 'completed') LIMIT 1",
@@ -1726,12 +1865,20 @@ app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res
     if (!enrollments[0]) {
       return res.status(403).json({ error: "Enroll in this course before submitting its assessment" });
     }
+    const hasCertificate = await hasActiveCertificate(req.user!.id, courseId);
+    if (hasCertificate) {
+      return res.status(403).json({ error: "Assessment submission is disabled after your certificate has been issued." });
+    }
     const access = await getAssessmentAccess(req.user!.id, courseId);
+    const attemptInfo = await getQuizAttemptInfo(req.user!.id, courseId, assessment.max_attempts);
     if (!access.unlocked) {
       return res.status(403).json({
         error: `Complete all learning materials before submitting the assessment (${access.completedMaterials}/${access.totalMaterials} completed)`,
         prerequisite: access,
       });
+    }
+    if (attemptInfo.remainingAttempts <= 0) {
+      return res.status(403).json({ error: "You have reached the maximum number of assessment attempts for this course." });
     }
   }
   const [questions] = await db.execute<RowDataPacket[]>(
@@ -1741,17 +1888,18 @@ app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res
   if (!questions.length) return res.status(400).json({ error: "This course has no active quiz questions" });
   const incorrect = questions.filter((question) => input.answers[question.id] !== question.correct_option);
   const score = ((questions.length - incorrect.length) / questions.length) * 100;
-  const passed = score >= 70;
+  const passed = score >= assessment.passing_score;
   const [attemptRows] = await db.execute<RowDataPacket[]>(
     "SELECT COUNT(*) count FROM quiz_attempts WHERE user_id = ? AND course_id = ?",
     [req.user!.id, courseId],
   );
+  const usedAttempts = Number(attemptRows[0]?.count ?? 0);
   const attemptId = randomUUID();
   await db.execute(
     `INSERT INTO quiz_attempts
      (id, user_id, course_id, attempt_number, score, passed, answered_count, total_questions, completed_modules, module_progress)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [attemptId, req.user!.id, courseId, Number(attemptRows[0].count) + 1, score, passed, Object.keys(input.answers).length, questions.length, 0, JSON.stringify([])],
+    [attemptId, req.user!.id, courseId, usedAttempts + 1, score, passed, Object.keys(input.answers).length, questions.length, 0, JSON.stringify([])],
   );
   for (const question of incorrect) {
     await db.execute(
@@ -1765,9 +1913,20 @@ app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res
   if (passed) {
     certificateId = await issueCertificateForCourse(req.user!.id, courseId, { attemptId, score });
   }
+  const remainingAttempts = Math.max(0, assessment.max_attempts - (usedAttempts + 1));
   await trackMemberActivity(req.user!.id, "quiz_submission", "courses", courseId, { attemptId, score, passed });
   io.to(`user:${req.user!.id}`).emit("quiz:submitted", { courseId, attemptId, score });
-  res.status(201).json({ attemptId, score, passed, incorrectCount: incorrect.length, total: questions.length, certificateId });
+  res.status(201).json({
+    attemptId,
+    score,
+    passed,
+    incorrectCount: incorrect.length,
+    total: questions.length,
+    certificateId,
+    maxAttempts: assessment.max_attempts,
+    remainingAttempts,
+    attemptNumber: usedAttempts + 1,
+  });
 }));
 
 const AI_ASSISTANT_USER_ID = "44000000-0000-4000-8000-000000000001";

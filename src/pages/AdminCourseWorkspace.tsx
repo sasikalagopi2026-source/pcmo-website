@@ -254,7 +254,7 @@ const AdminCourseWorkspace = ({ mode }: { mode: typeof sections[number] | "creat
 
 const QuickCreate = ({ title, fields, onCreate }: { title: string; fields: string[]; onCreate: (body: Record<string, any>) => void }) => {
   const [body, setBody] = useState<Record<string, any>>({});
-  return <div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">{title}</h2><div className="mt-3 grid gap-3 sm:grid-cols-2">{fields.map((field) => <Input key={field} placeholder={field.replaceAll("_"," ")} value={body[field] ?? ""} onChange={(e) => setBody({...body,[field]:["passing_score","max_attempts","module_index"].includes(field)?Number(e.target.value):e.target.value})} />)}</div><Button className="mt-3" onClick={() => { onCreate(body); setBody({}); }}><Plus className="h-4 w-4" /> Add</Button></div>;
+  return <div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">{title}</h2><div className="mt-3 grid gap-3 sm:grid-cols-2">{fields.map((field) => <Input key={field} placeholder={field.replaceAll("_"," ")} value={body[field] ?? ""} onChange={(e) => setBody({...body,[field]:["passing_score","max_attempts","timer_minutes","module_index"].includes(field)?Number(e.target.value):e.target.value})} />)}</div><Button className="mt-3" onClick={() => { onCreate(body); setBody({}); }}><Plus className="h-4 w-4" /> Add</Button></div>;
 };
 const ReportCard = ({ label, value }: { label: string; value: string }) => <div className="rounded-xl border bg-card p-5"><p className="text-sm text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-bold">{value}</p></div>;
 const CourseReports = ({ workspace, courseId }: { workspace: Workspace; courseId: string }) => {

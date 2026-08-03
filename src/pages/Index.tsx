@@ -84,13 +84,91 @@ const CommunityConversations = () => {
 };
 
 const PageKnowledgeHub = () => {
-  const query = useQuery({ queryKey: ["public-navigation-pages"], queryFn: async () => { const response = await fetch("/api/public/pages"); if (!response.ok) throw new Error("Knowledge hub unavailable"); return response.json() as Promise<PublicPageSummary[]>; }, staleTime: 60_000 });
-  const groups = ["Membership", "Certifications", "Resources", "Connect"].map((label) => ({ label, pages: (query.data ?? []).filter((page) => groupForPage(page.slug) === label) }));
+  const query = useQuery({
+    queryKey: ["public-navigation-pages"],
+    queryFn: async () => {
+      const response = await fetch("/api/public/pages");
+      if (!response.ok) throw new Error("Knowledge hub unavailable");
+      return response.json() as Promise<PublicPageSummary[]>;
+    },
+    staleTime: 60_000,
+  });
+
+  const groups = ["Membership", "Certifications", "Resources", "Connect"].map((label) => ({
+    label,
+    pages: (query.data ?? []).filter((page) => groupForPage(page.slug) === label),
+  }));
+
   const total = Math.max(1, groups.reduce((sum, group) => sum + group.pages.length, 0));
-  return <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-    <div className="relative overflow-hidden bg-gradient-to-r from-[#071f3b] via-[#0b3764] to-[#123f70] p-6 text-white"><div className="absolute -right-16 -top-20 h-48 w-48 animate-pulse rounded-full border-[32px] border-red-500/15"/><div className="relative flex flex-wrap items-center justify-between gap-4"><div><div className="flex items-center gap-2"><Layers3 className="h-5 w-5 text-red-400"/><p className="text-xs font-bold uppercase tracking-[.18em] text-red-300">PCMO knowledge hub</p></div><h2 className="mt-2 font-heading text-2xl font-extrabold">Explore every professional pathway</h2><p className="mt-2 max-w-2xl text-sm text-white/65">Published content is managed by PCMO administrators and updates here automatically.</p></div><div className="grid h-20 w-20 place-items-center rounded-full border-8 border-white/10 bg-white/5 text-center"><span><strong className="block text-2xl">{query.data?.length ?? 0}</strong><small className="text-[10px] uppercase text-white/60">Pages</small></span></div></div></div>
-    <div className="grid gap-5 p-5 md:grid-cols-2">{query.isLoading ? [1,2,3,4].map((item) => <div key={item} className="h-44 animate-pulse rounded-xl bg-muted"/>) : groups.map((group, groupIndex) => <article key={group.label} className="group rounded-xl border border-border p-5 transition duration-500 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"><div className="flex items-center justify-between"><div className="flex items-center gap-3"><div className={`grid h-11 w-11 place-items-center rounded-xl ${groupIndex % 2 ? "bg-red-500/10 text-red-600" : "bg-primary/10 text-primary"}`}><BookOpen className="h-5 w-5"/></div><div><h3 className="font-bold">{group.label}</h3><p className="text-xs text-muted-foreground">{group.pages.length} detailed pages</p></div></div><span className="text-xs font-black text-muted-foreground">{Math.round((group.pages.length / total) * 100)}%</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full animate-in slide-in-from-left bg-gradient-to-r from-primary to-red-500 duration-1000" style={{ width: `${Math.max(12, (group.pages.length / total) * 100)}%` }}/></div><div className="mt-4 grid gap-2 sm:grid-cols-2">{group.pages.map((page) => <Link key={page.slug} to={`/pages/${page.slug}`} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-xs font-semibold transition hover:bg-primary hover:text-primary-foreground"><span className="line-clamp-1">{page.menu_label || page.title}</span><ArrowRight className="h-3.5 w-3.5 shrink-0"/></Link>)}</div></article>)}</div>
-  </section>;
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#071f3b] via-[#0b3764] to-[#123f70] p-6 text-white">
+        <div className="absolute -right-16 -top-20 h-48 w-48 animate-pulse rounded-full border-[32px] border-red-500/15" />
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Layers3 className="h-5 w-5 text-red-400" />
+              <p className="text-xs font-bold uppercase tracking-[.18em] text-red-300">PCMO knowledge hub</p>
+            </div>
+            <h2 className="mt-2 font-heading text-2xl font-extrabold">Explore every professional pathway</h2>
+            <p className="mt-2 max-w-2xl text-sm text-white/65">Published content is managed by PCMO administrators and updates here automatically.</p>
+          </div>
+          <div className="grid h-20 w-20 place-items-center rounded-full border-8 border-white/10 bg-white/5 text-center">
+            <span>
+              <strong className="block text-2xl">{query.data?.length ?? 0}</strong>
+              <small className="text-[10px] uppercase text-white/60">Pages</small>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-5 p-5 md:grid-cols-2">
+        {query.isLoading ? (
+          [1, 2, 3, 4].map((item) => <div key={item} className="h-44 animate-pulse rounded-xl bg-muted" />)
+        ) : (
+          groups.map((group, groupIndex) => (
+            <article
+              key={group.label}
+              className="group rounded-xl border border-border p-5 transition duration-500 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`grid h-11 w-11 place-items-center rounded-xl ${groupIndex % 2 ? "bg-red-500/10 text-red-600" : "bg-primary/10 text-primary"}`}>
+                    <BookOpen className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">{group.label}</h3>
+                    <p className="text-xs text-muted-foreground">{group.pages.length} detailed pages</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full animate-in slide-in-from-left bg-gradient-to-r from-primary to-red-500 duration-1000"
+                  style={{ width: `${Math.max(12, (group.pages.length / total) * 100)}%` }}
+                />
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {group.pages.map((page) => (
+                  <Link
+                    key={page.slug}
+                    to={`/pages/${page.slug}`}
+                    className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-xs font-semibold transition hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <span className="line-clamp-1">{page.menu_label || page.title}</span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
 };
 
 const Index = () => {

@@ -31,6 +31,7 @@ type Course = {
   progress: number;
   module_count: number;
   completed_module_count: number;
+  has_certificate?: boolean;
 };
 
 type CourseMaterial = {
@@ -50,6 +51,33 @@ type CourseAssessment = {
   instructions: string;
   passing_score: number;
   max_attempts: number;
+};
+
+type AssessmentConfig = {
+  id: string | null;
+  title: string;
+  instructions: string;
+  passing_score: number;
+  max_attempts: number;
+  timer_minutes: number;
+  totalQuestions?: number;
+};
+
+type AttemptInfo = {
+  usedAttempts: number;
+  attemptNumber: number;
+  remainingAttempts: number;
+  maxAttempts: number;
+};
+
+type AssessmentAccess = {
+  totalMaterials: number;
+  completedMaterials: number;
+  unlocked: boolean;
+  hasCertificate?: boolean;
+  assessment: AssessmentConfig;
+  attemptInfo: AttemptInfo;
+  lockedReason?: string;
 };
 
 const materialLabels: Record<CourseMaterial["material_type"], string> = {
@@ -100,7 +128,7 @@ const CourseDetail = () => {
   });
   const assessmentAccess = useQuery({
     queryKey: ["assessment-access", id],
-    queryFn: () => api<{ totalMaterials: number; completedMaterials: number; unlocked: boolean }>(`/api/courses/${id}/assessment-access`),
+    queryFn: () => api<AssessmentAccess>(`/api/courses/${id}/assessment-access`),
     enabled: Boolean(id) && Boolean(course.data),
   });
   const toggleModule = useMutation({
@@ -115,8 +143,22 @@ const CourseDetail = () => {
       void queryClient.invalidateQueries({ queryKey: ["courses"] });
       void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["assessment-access", id] });
+      setJustCompleted(true);
     },
   });
+
+  const [justCompleted, setJustCompleted] = useState(false);
+  const [unlockedNow, setUnlockedNow] = useState(false);
+
+  useEffect(() => {
+    if (assessmentAccess.data?.unlocked && justCompleted) {
+      setUnlockedNow(true);
+      setJustCompleted(false);
+      const t = setTimeout(() => setUnlockedNow(false), 10_000);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [assessmentAccess.data?.unlocked, justCompleted]);
 
   const materialRows = useMemo(() => {
     const rows = materials.data?.rows ?? [];
@@ -131,7 +173,10 @@ const CourseDetail = () => {
   const selectedComplete = selectedMaterial ? completedIds.has(selectedMaterial.id) : false;
   const verifiedCount = assessmentAccess.data?.completedMaterials ?? course.data?.completed_module_count ?? 0;
   const totalRequired = assessmentAccess.data?.totalMaterials ?? course.data?.module_count ?? materialRows.length;
+  const assessmentConfig = assessmentAccess.data?.assessment;
+  const attemptInfo = assessmentAccess.data?.attemptInfo;
   const remainingForAssessment = Math.max(0, totalRequired - verifiedCount);
+  const assessmentUnlocked = assessmentAccess.data?.unlocked || remainingForAssessment === 0;
 
   useEffect(() => {
     if (!selectedMaterialId && materialRows.length) {
@@ -148,7 +193,7 @@ const CourseDetail = () => {
           <p className="rounded-lg border border-border bg-card p-5 text-sm text-destructive">{course.error.message}</p>
         ) : course.data ? (
           <>
-            <section className="rounded-xl border border-border bg-card p-6">
+            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -163,7 +208,7 @@ const CourseDetail = () => {
                     {course.data.instructor && <span>{course.data.instructor}</span>}
                   </div>
                 </div>
-                <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                <div className="rounded-lg border border-border bg-secondary/30 p-4 shadow-sm">
                   <div className="flex items-center justify-between text-sm">
                     <span>Course completion</span>
                     <strong>{Number(course.data.progress ?? 0)}%</strong>
@@ -179,7 +224,7 @@ const CourseDetail = () => {
             </section>
 
             <section className="grid gap-6 lg:grid-cols-[360px_1fr]">
-              <aside className="rounded-xl border border-border bg-card p-4">
+              <aside className="rounded-xl border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase text-primary">Step 1</p>
@@ -192,12 +237,12 @@ const CourseDetail = () => {
                     const Icon = materialIcon(material.material_type);
                     const complete = completedIds.has(material.id);
                     const active = selectedMaterial?.id === material.id;
-                    return (
+                      return (
                       <button
                         key={material.id}
                         type="button"
                         onClick={() => setSelectedMaterialId(material.id)}
-                        className={`w-full rounded-lg border p-3 text-left transition hover:bg-secondary/60 ${active ? "border-primary bg-primary/5" : "border-border bg-background"}`}
+                        className={`w-full rounded-lg border p-3 text-left transition hover:scale-[1.01] hover:shadow-sm ${active ? "border-primary bg-primary/5" : "border-border bg-background"}`}
                       >
                         <div className="flex items-start gap-3">
                           <div className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full ${complete ? "bg-success/10 text-success" : active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
@@ -271,21 +316,42 @@ const CourseDetail = () => {
                   )}
                 </section>
 
-                <section className={`rounded-xl border p-5 ${assessmentAccess.data?.unlocked ? "border-success/30 bg-success/5" : "border-border bg-secondary/50"}`}>
+                <section className={`rounded-xl border p-5 ${assessmentUnlocked ? "border-success/30 bg-success/5" : "border-border bg-secondary/50"}`}>
                   <div className="flex items-start gap-3">
-                    <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${assessmentAccess.data?.unlocked ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-                      {assessmentAccess.data?.unlocked ? <ShieldCheck className="h-5 w-5" /> : <LockKeyhole className="h-5 w-5" />}
+                    <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${assessmentUnlocked ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                      {assessmentUnlocked ? <ShieldCheck className="h-5 w-5" /> : <LockKeyhole className="h-5 w-5" />}
                     </div>
                     <div className="flex-1">
                       <p className="text-xs font-semibold uppercase text-primary">Step 2</p>
-                      <h2 className="font-heading text-xl font-bold">{assessmentAccess.data?.unlocked ? "Assessment Unlocked" : "Assessment Locked"}</h2>
+                      <h2 className="font-heading text-xl font-bold">{assessmentUnlocked ? "Assessment Unlocked" : "Assessment Locked"}</h2>
                       <p className="mt-2 text-sm text-muted-foreground">
-                        {assessmentAccess.data?.unlocked
-                          ? `Learning materials verified. ${course.data.quiz_question_count || 0} assessment questions are ready.`
-                          : `Complete ${remainingForAssessment} more learning material${remainingForAssessment === 1 ? "" : "s"} to unlock the quiz. ${verifiedCount} of ${totalRequired} verified.`}
+                        {course.data.has_certificate || assessmentAccess.data?.hasCertificate
+                          ? "A certificate has already been issued for this course. The assessment is no longer available."
+                          : assessmentUnlocked
+                            ? assessmentConfig
+                              ? `Learning materials verified. ${assessmentConfig.totalQuestions ?? (course.data.quiz_question_count || 0)} questions configured. ${attemptInfo?.remainingAttempts ?? assessmentConfig?.max_attempts} attempt(s) left.`
+                              : `Learning materials verified. ${course.data.quiz_question_count || 0} assessment questions are ready.`
+                            : `Complete ${remainingForAssessment} more learning material${remainingForAssessment === 1 ? "" : "s"} to unlock the quiz. ${verifiedCount} of ${totalRequired} verified.`}
                       </p>
+                      {assessmentConfig && !course.data.has_certificate && !assessmentAccess.data?.hasCertificate && (
+                        <div className="mt-2 rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground">
+                          Timer: {assessmentConfig.timer_minutes} minutes · Pass mark: {assessmentConfig.passing_score}% · Max attempts: {assessmentConfig.max_attempts}
+                        </div>
+                      )}
+                      {unlockedNow && (
+                        <div className="mt-3 rounded-lg border border-primary bg-primary/5 p-3 text-sm text-primary">
+                          <div className="flex items-center justify-between">
+                            <div>Congratulations — you completed the required materials. The assessment is now unlocked.</div>
+                            <div className="flex items-center gap-2">
+                              <Button asChild size="sm"><Link to={`/certification-quiz?course=${id}`}>Open assessment</Link></Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       <Progress value={totalRequired ? Math.min(100, (verifiedCount / totalRequired) * 100) : 0} className="mt-4 h-2" />
-                      {assessmentAccess.data?.unlocked ? (
+                      {course.data.has_certificate || assessmentAccess.data?.hasCertificate ? (
+                        <Button asChild className="mt-4"><Link to="/certifications">View certificate</Link></Button>
+                      ) : assessmentUnlocked ? (
                         <Button asChild className="mt-4"><Link to={`/certification-quiz?course=${id}`}>Open assessment</Link></Button>
                       ) : (
                         <Button className="mt-4" disabled><LockKeyhole className="h-4 w-4" />Complete materials first</Button>

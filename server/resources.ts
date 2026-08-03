@@ -28,7 +28,7 @@ export const resources: Record<string, ResourceConfig> = {
   },
   "course-assessments": {
     table: "course_assessments",
-    fields: ["course_id", "title", "assessment_type", "instructions", "passing_score", "max_attempts", "sort_order", "status"],
+    fields: ["course_id", "title", "assessment_type", "instructions", "passing_score", "max_attempts", "timer_minutes", "sort_order", "status"],
     searchable: ["title", "instructions"],
     publicRead: true,
   },
