@@ -158,7 +158,7 @@ const CertificationQuiz = () => {
         {courseId && quiz.isLoading && <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">Loading your assessment questions…</div>}
         {courseId && !quiz.isLoading && !quiz.error && !quiz.data && <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">No assessment questions are available for this course. Please check back once the course materials are complete.</div>}
         {!courses.isLoading && enrolledCourses.length === 0 && <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">Enroll in a course before accessing its assessment.</p>}
-        {selectedCourse?.has_certificate && <div className="rounded-xl border border-success/30 bg-success/10 p-5 text-sm text-success-foreground">
+{selectedCourse?.has_certificate && <div className="rounded-xl border border-success/30 bg-success/10 p-5 text-sm text-success">
           <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" /><p className="font-semibold">Certificate already issued</p></div>
           <p className="mt-1">You have already earned the course certificate, so the certification quiz is no longer available.</p>
           <Button asChild variant="outline" className="mt-4"><Link to="/certifications">View certificate</Link></Button>

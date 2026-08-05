@@ -2276,6 +2276,25 @@ app.get("/api/webinars/access", requireAuth, asyncRoute(async (req, res) => {
   res.json({ active });
 }));
 
+const webinarMediaDirectory = path.resolve(config.isProduction ? "server-dist" : "server", "webinars", "series-1");
+const requireWebinarAuth: express.RequestHandler = (req, res, next) => {
+  const token = typeof req.query.token === "string" ? req.query.token : "";
+  if (!req.headers.authorization && token) req.headers.authorization = `Bearer ${token}`;
+  requireAuth(req, res, next);
+};
+
+app.get("/api/webinars/series-1/:asset", requireWebinarAuth, asyncRoute(async (req, res) => {
+  const active = ["admin", "super_admin"].includes(req.user!.role) || await hasActiveMembership(req.user!.id);
+  if (!active) return res.status(403).json({ error: "An active membership is required to access webinars." });
+  const asset = routeParam(req.params.asset);
+  if (!/^[a-z0-9-]+(?:\.mp4|-video-script\.txt)$/i.test(asset)) return res.status(404).json({ error: "Webinar file not found" });
+  return res.sendFile(path.join(webinarMediaDirectory, asset), (error) => {
+    if (!error || res.headersSent) return;
+    const responseError = error as { statusCode?: number };
+    res.status(responseError.statusCode === 404 ? 404 : 500).json({ error: "Webinar file is unavailable" });
+  });
+}));
+
 app.post("/api/events/:id/register", requireAuth, asyncRoute(async (req, res) => {
   const [events] = await db.execute<RowDataPacket[]>("SELECT event_type FROM events WHERE id = ? LIMIT 1", [routeParam(req.params.id)]);
   if (!events[0]) return res.status(404).json({ error: "Event not found" });

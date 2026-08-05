@@ -13,5 +13,6 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server-dist ./server-dist
 COPY --from=build /app/server/schema.sql ./server-dist/schema.sql
+COPY --from=build /app/server/webinars ./server-dist/webinars
 EXPOSE 3001
 CMD ["npm", "start"]

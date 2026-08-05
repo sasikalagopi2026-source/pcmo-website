@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 server-dist
+xampp-mysql-data-backup-*/
 dist-ssr
 *.local
 .mysql/
