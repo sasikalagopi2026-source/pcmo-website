@@ -7,6 +7,7 @@ const StatsCards = ({ values }: { values: Record<string, number> }) => {
     { icon: Award, label: "Certificates", value: values.certificates ?? 0, color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
     { icon: FileCheck, label: "Assignments", value: values.assignments ?? 0, color: "text-success", bg: "bg-success/10", border: "border-success/20" },
     { icon: Bell, label: "Notifications", value: values.notifications ?? 0, color: "text-accent", bg: "bg-accent/10", border: "border-accent/20" },
+    { icon: Award, label: "Learning Credits", value: values.credits ?? 0, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
   ];
   const navigate = useNavigate();
   const handleClick = (label: string) => {
@@ -23,13 +24,17 @@ const StatsCards = ({ values }: { values: Record<string, number> }) => {
       case "Notifications":
         navigate("/notifications");
         break;
+      case "Learning Credits":
+        navigate("/community-profile");
+        break;
       default:
         navigate("/");
+        break;
     }
   };
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: "0.05s" }}>
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 animate-fade-in" style={{ animationDelay: "0.05s" }}>
       {stats.map((s) => (
         <button
           key={s.label}

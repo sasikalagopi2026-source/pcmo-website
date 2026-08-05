@@ -260,6 +260,7 @@ CREATE TABLE IF NOT EXISTS course_assessments (
   instructions TEXT NOT NULL,
   passing_score INT NOT NULL DEFAULT 70,
   max_attempts INT NOT NULL DEFAULT 3,
+  timer_minutes INT NOT NULL DEFAULT 30,
   sort_order INT NOT NULL DEFAULT 0,
   status VARCHAR(80) NOT NULL DEFAULT 'published',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1096,3 +1097,30 @@ VALUES
   ('20000000-0000-4000-8000-000000000013', 'Financial', 'Subscribe', 'financial/subscribe', 'Manage subscription offers and notes.', 'CreditCard', 30, TRUE),
   ('20000000-0000-4000-8000-000000000014', 'Marketing', 'Advertising Modal', 'advertising_modal', 'Manage advertising modal content and display status.', 'BellRing', 20, TRUE),
   ('20000000-0000-4000-8000-000000000015', 'Settings', 'Settings', 'settings', 'Manage admin settings records.', 'Settings', 10, TRUE);
+CREATE TABLE IF NOT EXISTS member_credit_awards (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  course_id CHAR(36) NOT NULL,
+  credits INT NOT NULL,
+  awarded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_member_credit_course (user_id, course_id),
+  CONSTRAINT fk_member_credit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_member_credit_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS course_payments (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  course_id CHAR(36) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  currency VARCHAR(12) NOT NULL DEFAULT 'USD',
+  status ENUM('pending','paid','failed','refunded') NOT NULL DEFAULT 'pending',
+  stripe_checkout_session_id VARCHAR(255) UNIQUE,
+  stripe_payment_intent_id VARCHAR(255),
+  paid_at DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_course_payment_user_course (user_id, course_id),
+  CONSTRAINT fk_course_payment_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_course_payment_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);

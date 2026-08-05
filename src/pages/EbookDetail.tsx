@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, CheckCircle2, Download, LockKeyhole, Repeat2, Share2, ShoppingCart } from "lucide-react";
+import { BookOpen, CheckCircle2, LockKeyhole, Repeat2, Share2, ShoppingCart } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { api, getToken, resourceApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/hooks/useCurrency";
 
-type Attachment = { name: string; url?: string; download_url?: string; mimeType?: string };
+type Attachment = { name: string; url?: string; download_url?: string; reader_url?: string; mimeType?: string };
 type Content = {
   id: string;
   title: string;
@@ -65,28 +65,8 @@ const EbookDetail = () => {
   const item = content.data;
   const isPaidBook = Boolean(item?.sale_enabled) && Number(item?.price ?? 0) > 0;
   const canDownload = access.data ? !access.data.paidRequired || access.data.purchased : !isPaidBook;
-  const downloadAttachment = async (file: Attachment) => {
-    const endpoint = file.download_url || file.url;
-    if (!endpoint) return;
-    if (!file.download_url) {
-      track.mutate("download");
-      window.location.href = endpoint;
-      return;
-    }
-    const response = await fetch(endpoint, {
-      headers: { Authorization: `Bearer ${getToken() ?? ""}` },
-    });
-    if (!response.ok) throw new Error("Unable to download this file");
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = file.name || item?.title || "ebook";
-    link.click();
-    URL.revokeObjectURL(url);
-  };
   const openReader = async (file: Attachment) => {
-    const endpoint = file.download_url || file.url;
+    const endpoint = file.reader_url || file.download_url || file.url;
     if (!endpoint) return;
     const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken() ?? ""}` } });
     if (!response.ok) throw new Error("Unable to open this book");
@@ -150,7 +130,7 @@ const EbookDetail = () => {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h2 className="font-heading text-lg font-semibold">{canDownload ? "Purchased book" : "Buy this book"}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">{canDownload ? "Downloads are available for your account." : "Purchase unlocks the attached book files for download."}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{canDownload ? "Read online is available for your account." : "Purchase unlocks secure online reading."}</p>
                   </div>
                   {canDownload
                     ? <Button variant="outline" disabled><CheckCircle2 className="h-4 w-4" /> Owned</Button>
@@ -166,7 +146,7 @@ const EbookDetail = () => {
             </div>
             {item.visibility?.attachments !== false && Boolean(item.attachments?.length) && (
               <section className="rounded-lg border border-border bg-card p-5">
-                <h2 className="font-heading text-lg font-semibold">Downloads</h2>
+                <h2 className="font-heading text-lg font-semibold">Read online</h2>
                 {canDownload ? (
                   <div className="mt-3 space-y-2">
                     {item.attachments?.map((file) => (
@@ -174,7 +154,7 @@ const EbookDetail = () => {
                         <span className="min-w-0 truncate">{file.name}</span>
                         <div className="flex shrink-0 gap-2">
                           {(file.mimeType === "application/pdf" || file.name?.toLowerCase().endsWith(".pdf")) && <Button size="sm" variant="outline" onClick={() => void openReader(file)}><BookOpen className="h-4 w-4" /> Read</Button>}
-                          <Button size="sm" variant="outline" onClick={() => void downloadAttachment(file)}><Download className="h-4 w-4" /> Download</Button>
+
                         </div>
                       </div>
                     ))}
@@ -182,12 +162,12 @@ const EbookDetail = () => {
                 ) : (
                   <div className="mt-3 flex items-center gap-3 rounded-lg border border-border bg-secondary p-4 text-sm text-muted-foreground">
                     <LockKeyhole className="h-4 w-4" />
-                    Purchase this book to unlock downloads.
+                    Purchase this book to unlock secure online reading.
                   </div>
                 )}
               </section>
             )}
-            {readerUrl && <section className="overflow-hidden rounded-lg border border-border bg-card"><div className="flex items-center justify-between border-b border-border p-4"><h2 className="font-heading text-lg font-semibold">Read online</h2><Button size="sm" variant="ghost" onClick={() => { URL.revokeObjectURL(readerUrl); setReaderUrl(null); }}>Close reader</Button></div><iframe title={`${item.title} reader`} src={readerUrl} className="h-[70vh] w-full bg-white" /></section>}
+            {readerUrl && <section className="overflow-hidden rounded-lg border border-border bg-card"><div className="flex items-center justify-between border-b border-border p-4"><h2 className="font-heading text-lg font-semibold">Read online</h2><Button size="sm" variant="ghost" onClick={() => { URL.revokeObjectURL(readerUrl); setReaderUrl(null); }}>Close reader</Button></div><iframe title={`${item.title} reader`} src={`${readerUrl}#toolbar=0&navpanes=0`} className="h-[70vh] w-full select-none bg-white" onContextMenu={(event) => event.preventDefault()} /></section>}
           </>
         )}
       </article>
@@ -196,3 +176,5 @@ const EbookDetail = () => {
 };
 
 export default EbookDetail;
+
+

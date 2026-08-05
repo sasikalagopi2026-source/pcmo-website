@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, Download, PlayCircle, Video } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { api } from "@/lib/api";
@@ -25,8 +25,9 @@ const Webinars = () => {
   const events = useQuery({ queryKey: ["events"], queryFn: () => api<Webinar[]>("/api/events") });
   const registration = useMutation({ mutationFn: (id: string) => api(`/api/events/${id}/register`, { method: "POST" }), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["events"] }) });
   const webinars = events.data?.filter((item) => item.event_type.toLowerCase() === "webinar") ?? [];
-  return (
-    <DashboardLayout>
+  const access = useQuery({ queryKey: ["webinar-access"], queryFn: () => api<{ active: boolean }>("/api/webinars/access") });
+  if (!access.isLoading && !access.data?.active) return <DashboardLayout><section className="mx-auto max-w-3xl rounded-xl border border-border bg-card p-8 text-center"><Video className="mx-auto h-10 w-10 text-primary"/><h1 className="mt-4 font-heading text-2xl font-bold">Member webinar access</h1><p className="mt-3 text-muted-foreground">Webinars are available to active PCMO members only. Activate your membership to unlock live sessions, recordings, and downloads.</p><Button className="mt-6" onClick={() => { window.location.href = "/membership"; }}>Unlock membership</Button></section></DashboardLayout>;
+  return (    <DashboardLayout>
       <div className="max-w-6xl space-y-10">
         <div><h1 className="font-heading text-3xl font-bold">Webinars</h1><p className="mt-1 text-muted-foreground">Watch PCMO learning videos and manage your live webinar registrations.</p></div>
         {(events.isLoading || webinars.length > 0) && <section><div className="mb-4"><p className="text-xs font-bold uppercase tracking-widest text-primary">Live programme</p><h2 className="mt-1 font-heading text-xl font-bold">Scheduled webinars</h2></div><div className="grid gap-4 sm:grid-cols-2">
@@ -41,7 +42,7 @@ const Webinars = () => {
               </div>
             </article>
           ))}
-          {events.isLoading && <p className="text-sm text-muted-foreground">Loading scheduled webinars…</p>}
+          {events.isLoading && <p className="text-sm text-muted-foreground">Loading scheduled webinarsâ€¦</p>}
         </div></section>}
 
         <section>
@@ -54,7 +55,7 @@ const Webinars = () => {
                   Your browser does not support HTML5 video.
                 </video>
                 <div className="p-5">
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground"><Badge>Webinar {item.number}</Badge><span>{item.duration}</span><span>•</span><span>{item.audience}</span></div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground"><Badge>Webinar {item.number}</Badge><span>{item.duration}</span><span>â€¢</span><span>{item.audience}</span></div>
                   <h3 className="mt-3 font-heading text-lg font-bold leading-6">{item.title}</h3>
                   <div className="mt-3 flex flex-wrap gap-2">{item.topics.map((topic) => <span key={topic} className="rounded-full bg-secondary px-2.5 py-1 text-xs">{topic}</span>)}</div>
                   <Button asChild variant="outline" size="sm" className="mt-4"><a href={`/webinars/series-1/${item.file}`} download><Download className="h-4 w-4" />Download MP4</a></Button>
@@ -69,3 +70,4 @@ const Webinars = () => {
 };
 
 export default Webinars;
+

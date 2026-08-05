@@ -20,6 +20,7 @@ import { config } from "./config.js";
 import { db, pingDatabase } from "./db.js";
 import { jsonFields, resources } from "./resources.js";
 import { buildPurchaseConfirmationEmailPayload, buildWelcomeEmailPayload } from "./email.js";
+import { getCourseCheckoutCancelUrl, getCourseCheckoutSuccessUrl, isPaidCourse } from "./courseCheckout.js";
 const app = express();
 const httpServer = createServer(app);
 const io = new SocketServer(httpServer, { cors: { origin: config.clientOrigins } });
@@ -295,6 +296,61 @@ const getAssessmentAccess = async (userId, courseId) => {
         unlocked: totalMaterials > 0 && completedMaterials >= totalMaterials,
     };
 };
+const hasActiveCertificate = async (userId, courseId) => {
+    const [rows] = await db.execute("SELECT 1 FROM certifications WHERE user_id = ? AND course_id = ? AND status = 'active' LIMIT 1", [userId, courseId]);
+    return Boolean(rows[0]);
+};
+const hasActiveMembership = async (userId) => {
+    const [rows] = await db.execute("SELECT 1 FROM memberships WHERE user_id = ? AND status = 'active' AND (ends_at IS NULL OR ends_at >= CURDATE()) LIMIT 1", [userId]);
+    return Boolean(rows[0]);
+};
+const shuffleArray = (items) => {
+    const array = [...items];
+    for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+};
+const getAssessmentConfig = async (courseId) => {
+    const [rows] = await db.execute(`SELECT id, title, instructions, passing_score, max_attempts
+     FROM course_assessments
+     WHERE course_id = ? AND status = 'published'
+     ORDER BY sort_order ASC
+     LIMIT 1`, [courseId]);
+    const assessment = rows[0];
+    const timerQuery = async () => {
+        try {
+            const [timerRows] = await db.execute(`SELECT timer_minutes FROM course_assessments
+         WHERE course_id = ? AND status = 'published'
+         ORDER BY sort_order ASC
+         LIMIT 1`, [courseId]);
+            const timerValue = timerRows[0]?.timer_minutes;
+            return timerValue != null ? Number(timerValue) : 30;
+        }
+        catch {
+            return 30;
+        }
+    };
+    return {
+        id: assessment?.id ?? null,
+        title: assessment?.title ?? "Certification Assessment",
+        instructions: assessment?.instructions ?? "Complete the quiz to earn your certificate.",
+        passing_score: Number(assessment?.passing_score ?? 70),
+        max_attempts: Number(assessment?.max_attempts ?? 3),
+        timer_minutes: await timerQuery(),
+    };
+};
+const getQuizAttemptInfo = async (userId, courseId, maxAttempts) => {
+    const [rows] = await db.execute("SELECT COUNT(*) count FROM quiz_attempts WHERE user_id = ? AND course_id = ?", [userId, courseId]);
+    const usedAttempts = Number(rows[0]?.count ?? 0);
+    return {
+        usedAttempts,
+        attemptNumber: usedAttempts + 1,
+        remainingAttempts: Math.max(0, maxAttempts - usedAttempts),
+        maxAttempts,
+    };
+};
 const audit = async (userId, action, resource, resourceId, details) => {
     await db.execute("INSERT INTO audit_logs (id, user_id, action, resource, resource_id, details) VALUES (?, ?, ?, ?, ?, ?)", [randomUUID(), userId ?? null, action, resource, resourceId ?? null, details ? JSON.stringify(details) : null]);
 };
@@ -549,7 +605,37 @@ const syncCertifiedCourseCompletions = async (userId) => {
             continue;
         seen.add(key);
         await completeCourseEnrollment(String(certificate.user_id), String(certificate.course_id));
+        await awardCourseCredits(String(certificate.user_id), String(certificate.course_id));
     }
+};
+const creditAchievementLevels = [
+    { name: "Bronze Member", threshold: 25, icon: "\u{1F949}", color: "#a16207" },
+    { name: "Silver Member", threshold: 50, icon: "\u{1F948}", color: "#64748b" },
+    { name: "Gold Member", threshold: 100, icon: "\u{1F947}", color: "#ca8a04" },
+    { name: "Platinum Member", threshold: 200, icon: "\u{1F48E}", color: "#0f766e" },
+    { name: "PCMO Fellow", threshold: 500, icon: "\u{1F451}", color: "#7e22ce" },
+];
+const awardCourseCredits = async (userId, courseId) => {
+    const [courses] = await db.execute("SELECT title, credits FROM courses WHERE id = ? LIMIT 1", [courseId]);
+    const course = courses[0];
+    const credits = Math.max(0, Number(course?.credits ?? 0));
+    if (course && credits > 0) {
+        const [result] = await db.execute("INSERT IGNORE INTO member_credit_awards (id, user_id, course_id, credits) VALUES (?, ?, ?, ?)", [randomUUID(), userId, courseId, credits]);
+        if (result.affectedRows > 0) {
+            await createNotification(userId, "Learning credits added", `${credits} credits were added for completing ${course.title}.`, "achievement", "/");
+            await trackMemberActivity(userId, "course_credits_awarded", "courses", courseId, { credits });
+        }
+    }
+    const [totals] = await db.execute("SELECT COALESCE(SUM(credits), 0) total FROM member_credit_awards WHERE user_id = ?", [userId]);
+    const total = Number(totals[0]?.total ?? 0);
+    for (const level of creditAchievementLevels.filter((item) => total >= item.threshold)) {
+        const [existing] = await db.execute("SELECT id FROM member_badges WHERE user_id = ? AND name = ? AND status = 'active' LIMIT 1", [userId, level.name]);
+        if (!existing[0]) {
+            await db.execute("INSERT INTO member_badges (id, user_id, name, description, icon, color, issued_by, issued_at, status) VALUES (?, ?, ?, ?, ?, ?, 'PCMO', CURDATE(), 'active')", [randomUUID(), userId, level.name, `Earned ${level.threshold}+ learning credits.`, level.icon, level.color]);
+            await createNotification(userId, "Achievement unlocked", `${level.icon} You are now a ${level.name}.`, "achievement", "/community-profile");
+        }
+    }
+    return total;
 };
 const activateStripeMembership = async (session) => {
     const membershipId = session.metadata?.membershipId;
@@ -692,6 +778,26 @@ const activateStripeBookPurchase = async (session) => {
     await trackMemberActivity(userId, "book_purchase_completed", "library_contents", bookId, { purchaseId, amount, currency });
     io.to(`user:${userId}`).emit("book-purchases:changed", { purchaseId, bookId, status: "paid" });
 };
+const activateStripeCourseEnrollment = async (session) => {
+    const userId = session.metadata?.userId;
+    const courseId = session.metadata?.courseId;
+    if (!userId || !courseId || session.payment_status !== "paid")
+        return;
+    const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+    await db.execute(`INSERT INTO course_payments (id, user_id, course_id, amount, currency, status, stripe_checkout_session_id, stripe_payment_intent_id, paid_at)
+     VALUES (?, ?, ?, ?, ?, 'paid', ?, ?, NOW())
+     ON DUPLICATE KEY UPDATE status='paid', stripe_checkout_session_id=VALUES(stripe_checkout_session_id), stripe_payment_intent_id=VALUES(stripe_payment_intent_id), paid_at=COALESCE(paid_at, NOW())`, [randomUUID(), userId, courseId, Number(session.amount_total ?? 0) / 100, String(session.currency ?? "usd").toUpperCase(), session.id, paymentIntentId]);
+    const [rows] = await db.execute("SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? LIMIT 1", [userId, courseId]);
+    if (rows[0]?.id) {
+        await db.execute("UPDATE course_enrollments SET status = 'active', progress = 0, last_viewed_at = COALESCE(last_viewed_at, NOW()) WHERE user_id = ? AND course_id = ?", [userId, courseId]);
+    }
+    else {
+        await db.execute("INSERT INTO course_enrollments (id, user_id, course_id, status, progress) VALUES (?, ?, ?, 'active', 0)", [randomUUID(), userId, courseId]);
+    }
+    await audit(userId, "stripe_checkout_completed", "courses", courseId, { sessionId: session.id, checkoutType: "course" });
+    await trackMemberActivity(userId, "course_enrollment", "courses", courseId, { sessionId: session.id, checkoutType: "course" });
+    io.to(`user:${userId}`).emit("enrollment:changed", { courseId });
+};
 const activateStripeBookCartPurchase = async (session) => {
     const userId = session.metadata?.userId;
     let purchaseIds = [];
@@ -750,6 +856,8 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
             await activateStripeBookPurchase(session);
         else if (session.metadata?.checkoutType === "book-cart")
             await activateStripeBookCartPurchase(session);
+        else if (session.metadata?.checkoutType === "course")
+            await activateStripeCourseEnrollment(session);
         else
             await activateStripeMembership(session);
     }
@@ -781,6 +889,8 @@ app.post("/api/stripe/confirm-session", requireAuth, asyncRoute(async (req, res)
             await activateStripeBookPurchase(session);
         else if (session.metadata?.checkoutType === "book-cart")
             await activateStripeBookCartPurchase(session);
+        else if (session.metadata?.checkoutType === "course")
+            await activateStripeCourseEnrollment(session);
         else
             await activateStripeMembership(session);
     }
@@ -1031,20 +1141,23 @@ app.get("/api/student/dashboard", requireAuth, asyncRoute(async (req, res) => {
        p.avatar_url, p.cover_url, p.member_number
        FROM users u LEFT JOIN profiles p ON p.user_id = u.id WHERE u.id = ?`, [userId]),
         db.execute(`SELECT
-       (SELECT COUNT(*) FROM course_enrollments WHERE user_id = ?) courses,
+       (SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE ce.user_id = ? AND (COALESCE(c.price,0)=0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid'))) courses,
        (SELECT COUNT(*) FROM certifications WHERE user_id = ?) certificates,
        (SELECT COUNT(*) FROM quiz_attempts WHERE user_id = ?) assignments,
        (SELECT COUNT(*) FROM notifications WHERE user_id = ? AND read_at IS NULL) notifications`, [userId, userId, userId, userId]),
         db.execute("SELECT * FROM memberships WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", [userId]),
         db.execute(`SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at
        FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id
-       WHERE ce.user_id = ? ORDER BY ce.enrolled_at DESC`, [userId]),
+       WHERE ce.user_id = ? AND (COALESCE(c.price,0)=0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid')) ORDER BY ce.enrolled_at DESC`, [userId]),
         db.execute(`SELECT id, course_id, title, recipient_name, designation, issuer, credential_id, issue_date, expiry_date, status
        FROM certifications
        WHERE user_id = ? AND status = 'active'
        ORDER BY COALESCE(issue_date, created_at) DESC
        LIMIT 3`, [userId]),
     ]);
+    const [creditRows] = await db.execute("SELECT COALESCE(SUM(credits), 0) total FROM member_credit_awards WHERE user_id = ?", [userId]);
+    const credits = Number(creditRows[0]?.total ?? 0);
+    statsRows[0].credits = credits;
     res.json({
         profile: profileRows[0] ?? null,
         stats: statsRows[0] ?? { courses: 0, certificates: 0, assignments: 0, notifications: 0 },
@@ -1283,10 +1396,67 @@ app.post("/api/membership/checkout", requireAuth, asyncRoute(async (req, res) =>
         response.membershipId = membershipId;
     res.status(201).json(response);
 }));
+app.post("/api/courses/:id/checkout", requireAuth, asyncRoute(async (req, res) => {
+    const courseId = routeParam(req.params.id);
+    const [rows] = await db.execute(`SELECT id, title, description, price, status FROM courses WHERE id = ? AND status = 'published' LIMIT 1`, [courseId]);
+    const course = rows[0];
+    if (!course)
+        return res.status(404).json({ error: "Course not found" });
+    const price = Number(course.price ?? 0);
+    if (!isPaidCourse(price)) {
+        const [existing] = await db.execute("SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? AND status IN ('active', 'completed') LIMIT 1", [req.user.id, courseId]);
+        if (existing[0] && "id" in existing[0] && existing[0].id)
+            return res.json({ status: "active", existing: true });
+        const id = randomUUID();
+        await db.execute(`INSERT INTO course_enrollments (id, user_id, course_id, status, progress)
+       VALUES (?, ?, ?, 'active', 0) ON DUPLICATE KEY UPDATE status = 'active', progress = 0`, [id, req.user.id, courseId]);
+        await audit(req.user.id, "enroll", "courses", courseId);
+        await trackMemberActivity(req.user.id, "course_enrollment", "courses", courseId);
+        io.to(`user:${req.user.id}`).emit("enrollment:changed", { courseId });
+        return res.status(201).json({ status: "active", success: true });
+    }
+    if (!stripe)
+        return res.status(503).json({ error: "Stripe is not configured. Add STRIPE_SECRET_KEY to the API environment." });
+    const [existing] = await db.execute("SELECT ce.id FROM course_enrollments ce JOIN course_payments cp ON cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid' WHERE ce.user_id = ? AND ce.course_id = ? AND ce.status IN ('active', 'completed') LIMIT 1", [req.user.id, courseId]);
+    if (existing[0] && "id" in existing[0] && existing[0].id)
+        return res.json({ status: "active", existing: true });
+    const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer_email: req.user.email,
+        line_items: [{
+                quantity: 1,
+                price_data: {
+                    currency: "usd",
+                    product_data: { name: String(course.title ?? "Course"), description: String(course.description ?? "PCMO course access") },
+                    unit_amount: Math.round(price * 100),
+                },
+            }],
+        success_url: getCourseCheckoutSuccessUrl(config.clientUrl, courseId),
+        cancel_url: getCourseCheckoutCancelUrl(config.clientUrl, courseId),
+        metadata: {
+            checkoutType: "course",
+            courseId,
+            userId: req.user.id,
+            courseTitle: String(course.title ?? "Course"),
+        },
+    });
+    await trackMemberActivity(req.user.id, "course_checkout_started", "courses", courseId, { sessionId: session.id, amount: price });
+    await db.execute(`INSERT INTO course_payments (id, user_id, course_id, amount, currency, status, stripe_checkout_session_id)
+     VALUES (?, ?, ?, ?, 'USD', 'pending', ?)
+     ON DUPLICATE KEY UPDATE amount=VALUES(amount), status='pending', stripe_checkout_session_id=VALUES(stripe_checkout_session_id)`, [randomUUID(), req.user.id, courseId, price, session.id]);
+    res.status(201).json({ checkoutUrl: session.url, sessionId: session.id, status: "pending" });
+}));
 app.post("/api/courses/:id/enroll", requireAuth, asyncRoute(async (req, res) => {
     const id = randomUUID();
-    await db.execute(`INSERT INTO course_enrollments (id, user_id, course_id)
-     VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = 'active'`, [id, req.user.id, routeParam(req.params.id)]);
+    const courseId = routeParam(req.params.id);
+    const [courses] = await db.execute("SELECT price FROM courses WHERE id = ? AND status = 'published' LIMIT 1", [courseId]);
+    if (!courses[0])
+        return res.status(404).json({ error: "Course not found" });
+    if (isPaidCourse(courses[0].price)) {
+        return res.status(403).json({ error: "Please purchase this course to unlock all learning materials, assessments, and certification." });
+    }
+    await db.execute(`INSERT INTO course_enrollments (id, user_id, course_id, status, progress)
+     VALUES (?, ?, ?, 'active', 0) ON DUPLICATE KEY UPDATE status = 'active', progress = 0`, [id, req.user.id, routeParam(req.params.id)]);
     await audit(req.user.id, "enroll", "courses", routeParam(req.params.id));
     await trackMemberActivity(req.user.id, "course_enrollment", "courses", routeParam(req.params.id));
     io.to(`user:${req.user.id}`).emit("enrollment:changed", { courseId: routeParam(req.params.id) });
@@ -1300,11 +1470,12 @@ app.delete("/api/courses/:id/enroll", requireAuth, asyncRoute(async (req, res) =
 }));
 app.get("/api/courses", requireAuth, asyncRoute(async (req, res) => {
     await syncCertifiedCourseCompletions(req.user.id);
-    const [rows] = await db.execute(`SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at
+    const [rows] = await db.execute(`SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at,
+      COALESCE((SELECT 1 FROM certifications cert WHERE cert.user_id = ? AND cert.course_id = c.id AND cert.status = 'active' LIMIT 1), 0) has_certificate
      FROM courses c
-     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
+     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ? AND (COALESCE(c.price, 0) = 0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id = ce.user_id AND cp.course_id = ce.course_id AND cp.status = 'paid'))
      WHERE c.status = 'published'
-     ORDER BY c.updated_at DESC`, [req.user.id]);
+     ORDER BY c.updated_at DESC`, [req.user.id, req.user.id]);
     res.json(rows.map(parseJsonFields));
 }));
 app.get("/api/courses/:id", requireAuth, asyncRoute(async (req, res) => {
@@ -1313,20 +1484,31 @@ app.get("/api/courses/:id", requireAuth, asyncRoute(async (req, res) => {
     const [rows] = await db.execute(`SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at,
       (SELECT COUNT(*) FROM quiz_questions qq WHERE qq.course_id = c.id AND qq.active = TRUE) quiz_question_count,
       (SELECT COUNT(*) FROM course_materials cm WHERE cm.course_id = c.id AND cm.status = 'published') module_count,
-      (SELECT COUNT(*) FROM course_module_progress cmp WHERE cmp.course_id = c.id AND cmp.user_id = ?) completed_module_count
+      (SELECT COUNT(*) FROM course_module_progress cmp WHERE cmp.course_id = c.id AND cmp.user_id = ?) completed_module_count,
+      COALESCE((SELECT 1 FROM certifications cert WHERE cert.user_id = ? AND cert.course_id = c.id AND cert.status = 'active' LIMIT 1), 0) has_certificate
      FROM courses c
-     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
+     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ? AND (COALESCE(c.price, 0) = 0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id = ce.user_id AND cp.course_id = ce.course_id AND cp.status = 'paid'))
      WHERE c.id = ?
-     LIMIT 1`, [req.user.id, req.user.id, courseId]);
+     LIMIT 1`, [req.user.id, req.user.id, req.user.id, courseId]);
     const course = rows[0];
     if (!course)
         return res.status(404).json({ error: "Course not found" });
     if (!admin && course.status !== "published")
         return res.status(404).json({ error: "Course not found" });
-    if (!admin && !["active", "completed"].includes(course.enrollment_status)) {
-        return res.status(403).json({ error: "Enroll in this course before viewing its content" });
-    }
     res.json(parseJsonFields(course));
+}));
+app.get("/api/courses/:id/materials", requireAuth, asyncRoute(async (req, res) => {
+    const courseId = routeParam(req.params.id);
+    const admin = ["admin", "super_admin"].includes(req.user.role);
+    const [enrollments, materials] = await Promise.all([
+        db.execute("SELECT ce.id FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id LEFT JOIN course_payments cp ON cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid' WHERE ce.user_id = ? AND ce.course_id = ? AND ce.status IN ('active', 'completed') AND (COALESCE(c.price,0)=0 OR cp.id IS NOT NULL) LIMIT 1", [req.user.id, courseId]),
+        db.execute("SELECT id, material_type, title, description, content_url, body, duration, sort_order FROM course_materials WHERE course_id = ? AND status = 'published' ORDER BY sort_order, created_at", [courseId]),
+    ]);
+    const unlocked = admin || Boolean(enrollments[0][0]);
+    const rows = unlocked ? materials[0] : materials[0].map((material) => ({
+        id: material.id, material_type: material.material_type, title: material.title, description: material.description, duration: material.duration, locked: true,
+    }));
+    res.json({ rows, unlocked });
 }));
 app.put("/api/courses/:courseId/modules/:materialId/progress", requireAuth, asyncRoute(async (req, res) => {
     const courseId = routeParam(req.params.courseId);
@@ -1354,6 +1536,8 @@ app.put("/api/courses/:courseId/modules/:materialId/progress", requireAuth, asyn
     const progress = total ? Math.round((completed / total) * 100) : 0;
     await db.execute("UPDATE course_enrollments SET progress = ?, status = ?, last_viewed_at = CURRENT_TIMESTAMP WHERE user_id = ? AND course_id = ?", [progress, progress >= 100 ? "completed" : "active", req.user.id, courseId]);
     await trackMemberActivity(req.user.id, input.completed ? "module_completed" : "module_reopened", "courses", courseId, { materialId, progress });
+    if (progress >= 100)
+        await awardCourseCredits(req.user.id, courseId);
     io.emit("course-progress:changed", { userId: req.user.id, courseId, materialId, progress });
     res.json({ completed, total, progress });
 }));
@@ -1364,41 +1548,120 @@ app.get("/api/courses/:id/module-progress", requireAuth, asyncRoute(async (req, 
 app.get("/api/courses/:id/assessment-access", requireAuth, asyncRoute(async (req, res) => {
     const courseId = routeParam(req.params.id);
     const access = await getAssessmentAccess(req.user.id, courseId);
-    res.json(access);
+    const hasCertificate = await hasActiveCertificate(req.user.id, courseId);
+    const assessment = await getAssessmentConfig(courseId);
+    const attemptInfo = await getQuizAttemptInfo(req.user.id, courseId, assessment.max_attempts);
+    const unlocked = !hasCertificate && access.unlocked && attemptInfo.remainingAttempts > 0;
+    let lockedReason;
+    if (hasCertificate) {
+        lockedReason = "A certificate has already been issued for this course.";
+    }
+    else if (!access.unlocked) {
+        lockedReason = `Complete all learning materials before opening the assessment (${access.completedMaterials}/${access.totalMaterials} completed)`;
+    }
+    else if (attemptInfo.remainingAttempts <= 0) {
+        lockedReason = "You have reached the maximum number of assessment attempts for this course.";
+    }
+    res.json({
+        ...access,
+        unlocked,
+        hasCertificate,
+        assessment,
+        attemptInfo,
+        lockedReason,
+    });
 }));
 app.get("/api/courses/:id/quiz", requireAuth, asyncRoute(async (req, res) => {
     const courseId = routeParam(req.params.id);
+    const assessment = await getAssessmentConfig(courseId);
     if (!["admin", "super_admin"].includes(req.user.role)) {
         const [enrollments] = await db.execute("SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? AND status IN ('active', 'completed') LIMIT 1", [req.user.id, courseId]);
         if (!enrollments[0]) {
             return res.status(403).json({ error: "Enroll in this course before taking its assessment" });
         }
+        const hasCertificate = await hasActiveCertificate(req.user.id, courseId);
+        if (hasCertificate) {
+            return res.status(403).json({ error: "Assessment access is disabled after your certificate has been issued. View your certificate instead." });
+        }
         const access = await getAssessmentAccess(req.user.id, courseId);
+        const attemptInfo = await getQuizAttemptInfo(req.user.id, courseId, assessment.max_attempts);
         if (!access.unlocked) {
             return res.status(403).json({
                 error: `Complete all learning materials before opening the assessment (${access.completedMaterials}/${access.totalMaterials} completed)`,
                 prerequisite: access,
             });
         }
+        if (attemptInfo.remainingAttempts <= 0) {
+            return res.status(403).json({
+                error: "You have reached the maximum number of assessment attempts for this course.",
+                attemptInfo,
+            });
+        }
     }
     const [rows] = await db.execute(`SELECT id, course_id, module_index, question_text, options, explanation, sort_order
      FROM quiz_questions WHERE course_id = ? AND active = TRUE ORDER BY module_index, sort_order`, [courseId]);
-    res.json(rows.map(parseJsonFields));
+    const parseQuestionOptions = (value) => {
+        if (Array.isArray(value))
+            return value.filter((item) => typeof item === "string");
+        if (typeof value === "string") {
+            try {
+                const parsed = JSON.parse(value);
+                if (Array.isArray(parsed))
+                    return parsed.filter((item) => typeof item === "string");
+            }
+            catch {
+                // fallback to simple delimiter parsing for legacy or malformed data
+            }
+            return value.split("|").map((item) => item.trim()).filter(Boolean);
+        }
+        return [];
+    };
+    const questions = shuffleArray(rows.map(parseJsonFields))
+        .map((question) => {
+        const options = parseQuestionOptions(question.options);
+        return {
+            id: question.id,
+            course_id: question.course_id,
+            module_index: question.module_index,
+            question_text: question.question_text,
+            options: shuffleArray(options),
+            explanation: question.explanation,
+        };
+    })
+        .filter((question) => question.options.length > 0 && question.question_text);
+    const attemptInfo = await getQuizAttemptInfo(req.user.id, courseId, assessment.max_attempts);
+    res.json({
+        assessment: {
+            ...assessment,
+            totalQuestions: questions.length,
+        },
+        questions,
+        attemptInfo,
+    });
 }));
 app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res) => {
     const input = z.object({ answers: z.record(z.string(), z.string()) }).parse(req.body);
     const courseId = routeParam(req.params.id);
+    const assessment = await getAssessmentConfig(courseId);
     if (!["admin", "super_admin"].includes(req.user.role)) {
         const [enrollments] = await db.execute("SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? AND status IN ('active', 'completed') LIMIT 1", [req.user.id, courseId]);
         if (!enrollments[0]) {
             return res.status(403).json({ error: "Enroll in this course before submitting its assessment" });
         }
+        const hasCertificate = await hasActiveCertificate(req.user.id, courseId);
+        if (hasCertificate) {
+            return res.status(403).json({ error: "Assessment submission is disabled after your certificate has been issued." });
+        }
         const access = await getAssessmentAccess(req.user.id, courseId);
+        const attemptInfo = await getQuizAttemptInfo(req.user.id, courseId, assessment.max_attempts);
         if (!access.unlocked) {
             return res.status(403).json({
                 error: `Complete all learning materials before submitting the assessment (${access.completedMaterials}/${access.totalMaterials} completed)`,
                 prerequisite: access,
             });
+        }
+        if (attemptInfo.remainingAttempts <= 0) {
+            return res.status(403).json({ error: "You have reached the maximum number of assessment attempts for this course." });
         }
     }
     const [questions] = await db.execute("SELECT id, module_index, question_text, correct_option FROM quiz_questions WHERE course_id = ? AND active = TRUE", [courseId]);
@@ -1406,12 +1669,13 @@ app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res
         return res.status(400).json({ error: "This course has no active quiz questions" });
     const incorrect = questions.filter((question) => input.answers[question.id] !== question.correct_option);
     const score = ((questions.length - incorrect.length) / questions.length) * 100;
-    const passed = score >= 70;
+    const passed = score >= assessment.passing_score;
     const [attemptRows] = await db.execute("SELECT COUNT(*) count FROM quiz_attempts WHERE user_id = ? AND course_id = ?", [req.user.id, courseId]);
+    const usedAttempts = Number(attemptRows[0]?.count ?? 0);
     const attemptId = randomUUID();
     await db.execute(`INSERT INTO quiz_attempts
      (id, user_id, course_id, attempt_number, score, passed, answered_count, total_questions, completed_modules, module_progress)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [attemptId, req.user.id, courseId, Number(attemptRows[0].count) + 1, score, passed, Object.keys(input.answers).length, questions.length, 0, JSON.stringify([])]);
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [attemptId, req.user.id, courseId, usedAttempts + 1, score, passed, Object.keys(input.answers).length, questions.length, 0, JSON.stringify([])]);
     for (const question of incorrect) {
         await db.execute(`INSERT INTO incorrect_answers
        (id, user_id, course_id, question_text, selected_option, correct_option, module_index)
@@ -1421,9 +1685,20 @@ app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res
     if (passed) {
         certificateId = await issueCertificateForCourse(req.user.id, courseId, { attemptId, score });
     }
+    const remainingAttempts = Math.max(0, assessment.max_attempts - (usedAttempts + 1));
     await trackMemberActivity(req.user.id, "quiz_submission", "courses", courseId, { attemptId, score, passed });
     io.to(`user:${req.user.id}`).emit("quiz:submitted", { courseId, attemptId, score });
-    res.status(201).json({ attemptId, score, passed, incorrectCount: incorrect.length, total: questions.length, certificateId });
+    res.status(201).json({
+        attemptId,
+        score,
+        passed,
+        incorrectCount: incorrect.length,
+        total: questions.length,
+        certificateId,
+        maxAttempts: assessment.max_attempts,
+        remainingAttempts,
+        attemptNumber: usedAttempts + 1,
+    });
 }));
 const AI_ASSISTANT_USER_ID = "44000000-0000-4000-8000-000000000001";
 const sensitiveChatPattern = /\b(legal advice|lawsuit|litigation|dispute|claim strategy|payment|refund|invoice|stripe|password|account access|certificate fraud|medical|self[- ]harm|harassment|emergency)\b/i;
@@ -1573,7 +1848,17 @@ app.delete("/api/expert-rooms/:id/reserve", requireAuth, asyncRoute(async (req, 
     io.emit("expert-rooms:changed", { action: "cancel", roomId });
     res.status(204).end();
 }));
+app.get("/api/webinars/access", requireAuth, asyncRoute(async (req, res) => {
+    const active = ["admin", "super_admin"].includes(req.user.role) || await hasActiveMembership(req.user.id);
+    res.json({ active });
+}));
 app.post("/api/events/:id/register", requireAuth, asyncRoute(async (req, res) => {
+    const [events] = await db.execute("SELECT event_type FROM events WHERE id = ? LIMIT 1", [routeParam(req.params.id)]);
+    if (!events[0])
+        return res.status(404).json({ error: "Event not found" });
+    if (String(events[0].event_type).toLowerCase() === "webinar" && !["admin", "super_admin"].includes(req.user.role) && !(await hasActiveMembership(req.user.id))) {
+        return res.status(403).json({ error: "An active membership is required to access webinars." });
+    }
     await db.execute(`INSERT INTO event_registrations (id, user_id, event_id)
      VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = 'registered'`, [randomUUID(), req.user.id, routeParam(req.params.id)]);
     await trackMemberActivity(req.user.id, "event_registration", "events", routeParam(req.params.id));
@@ -1803,7 +2088,9 @@ app.get("/api/books/:id/download/:index", requireAuth, asyncRoute(async (req, re
     await db.execute("UPDATE library_contents SET downloads = downloads + 1 WHERE id = ?", [bookId]);
     await trackMemberActivity(req.user.id, "book_file_download", "library_contents", bookId, { attachment: attachment.name ?? index });
     io.emit("library:changed", { action: "download", id: bookId });
-    res.download(absolutePath, attachment.name || `${String(parsed.title ?? "ebook")}-${index + 1}`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline");
+    res.sendFile(absolutePath);
 }));
 app.get("/api/books/purchases", requireAuth, asyncRoute(async (req, res) => {
     const [rows] = await db.execute("SELECT book_id, status, purchased_at FROM book_purchases WHERE user_id = ? AND status = 'paid'", [req.user.id]);
@@ -2018,6 +2305,12 @@ app.get("/api/resources/:resource", requireAuth, asyncRoute(async (req, res) => 
         return res.status(404).json({ error: "Unknown resource" });
     if (!resource.publicRead && !resource.ownerField && !["admin", "super_admin"].includes(req.user.role)) {
         return res.status(403).json({ error: "Administrator access required" });
+    }
+    if (resourceName === "course-materials" && !["admin", "super_admin"].includes(req.user.role)) {
+        const courseId = String(req.query.course_id ?? "");
+        const [enrollments] = await db.execute("SELECT ce.id FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id LEFT JOIN course_payments cp ON cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid' WHERE ce.user_id = ? AND ce.course_id = ? AND ce.status IN ('active', 'completed') AND (COALESCE(c.price,0)=0 OR cp.id IS NOT NULL) LIMIT 1", [req.user.id, courseId]);
+        if (!enrollments[0])
+            return res.status(403).json({ error: "Please purchase this course to unlock all learning materials, assessments, and certification." });
     }
     if (resourceName === "certifications") {
         const userId = ["admin", "super_admin"].includes(req.user.role) ? undefined : req.user.id;

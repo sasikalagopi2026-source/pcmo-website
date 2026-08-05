@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -31,10 +31,13 @@ type Course = {
   progress: number;
   module_count: number;
   completed_module_count: number;
+  enrollment_status?: string | null;
   has_certificate?: boolean;
+  price?: number | null;
 };
 
 type CourseMaterial = {
+  locked?: boolean;
   id: string;
   material_type: "video" | "study_guide" | "reading" | "worksheet" | "case_study";
   title: string;
@@ -103,8 +106,10 @@ const previewText = (value?: string, limit = 150) => {
 
 const CourseDetail = () => {
   const { id = "" } = useParams();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [selectedMaterialId, setSelectedMaterialId] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
 
   const course = useQuery({
     queryKey: ["course", id],
@@ -113,7 +118,7 @@ const CourseDetail = () => {
   });
   const materials = useQuery({
     queryKey: ["course-materials", id],
-    queryFn: () => resourceApi.list<CourseMaterial>("course-materials", { course_id: id, status: "published", limit: 100 }),
+    queryFn: () => api<{ rows: CourseMaterial[]; unlocked: boolean }>(`/api/courses/${id}/materials`),
     enabled: Boolean(id) && Boolean(course.data),
   });
   const assessments = useQuery({
@@ -124,13 +129,34 @@ const CourseDetail = () => {
   const moduleProgress = useQuery({
     queryKey: ["module-progress", id],
     queryFn: () => api<Array<{ material_id: string; completed_at: string }>>(`/api/courses/${id}/module-progress`),
-    enabled: Boolean(id) && Boolean(course.data),
+    enabled: Boolean(id) && Boolean(course.data) && Boolean(course.data?.enrollment_status),
   });
   const assessmentAccess = useQuery({
     queryKey: ["assessment-access", id],
     queryFn: () => api<AssessmentAccess>(`/api/courses/${id}/assessment-access`),
-    enabled: Boolean(id) && Boolean(course.data),
+    enabled: Boolean(id) && Boolean(course.data) && Boolean(course.data?.enrollment_status),
   });
+  const courseAction = useMutation({
+    mutationFn: () => {
+      if (!id) throw new Error("Course id is missing");
+      const price = Number(course.data?.price ?? 0);
+      if (price > 0) {
+        return api<{ checkoutUrl?: string; status?: string }>(`/api/courses/${id}/checkout`, { method: "POST" });
+      }
+      return api<{ checkoutUrl?: string; status?: string }>(`/api/courses/${id}/enroll`, { method: "POST" });
+    },
+    onSuccess: (result) => {
+      if (result?.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
+      void queryClient.invalidateQueries({ queryKey: ["course", id] });
+      void queryClient.invalidateQueries({ queryKey: ["courses"] });
+      void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
+      setStatusMessage("You are now enrolled in this course. Start learning whenever you are ready.");
+    },
+  });
+
   const toggleModule = useMutation({
     mutationFn: ({ materialId, completed }: { materialId: string; completed: boolean }) =>
       api(`/api/courses/${id}/modules/${materialId}/progress`, {
@@ -151,6 +177,29 @@ const CourseDetail = () => {
   const [unlockedNow, setUnlockedNow] = useState(false);
 
   useEffect(() => {
+    if (searchParams.get("payment") === "success") {
+      const sessionId = searchParams.get("session_id");
+      if (!sessionId) {
+        setStatusMessage("Payment confirmation is missing. Please refresh or contact support.");
+        return;
+      }
+      setStatusMessage("Confirming your payment and unlocking your course...");
+      void api<{ success: boolean }>("/api/stripe/confirm-session", { method: "POST", body: JSON.stringify({ sessionId }) })
+        .then(() => {
+          setStatusMessage("Payment received. Your course enrollment has been activated.");
+          void queryClient.invalidateQueries({ queryKey: ["course", id] });
+          void queryClient.invalidateQueries({ queryKey: ["courses"] });
+          void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
+          void queryClient.invalidateQueries({ queryKey: ["course-materials", id] });
+        })
+        .catch((error: Error) => setStatusMessage(error.message || "We could not confirm your payment yet. Please refresh shortly."));
+    }
+    if (searchParams.get("payment") === "cancelled") {
+      setStatusMessage("Payment was cancelled. You can try again at any time.");
+    }
+  }, [id, queryClient, searchParams]);
+
+  useEffect(() => {
     if (assessmentAccess.data?.unlocked && justCompleted) {
       setUnlockedNow(true);
       setJustCompleted(false);
@@ -164,6 +213,7 @@ const CourseDetail = () => {
     const rows = materials.data?.rows ?? [];
     return [...rows].sort((a, b) => materialOrder.indexOf(a.material_type) - materialOrder.indexOf(b.material_type));
   }, [materials.data?.rows]);
+  const canViewContent = Boolean(course.data?.enrollment_status);
   const completedIds = useMemo(() => new Set(moduleProgress.data?.map((item) => item.material_id) ?? []), [moduleProgress.data]);
   const nextIncomplete = materialRows.find((material) => !completedIds.has(material.id));
   const selectedMaterial = materialRows.find((material) => material.id === selectedMaterialId) ?? nextIncomplete ?? materialRows[0];
@@ -176,13 +226,21 @@ const CourseDetail = () => {
   const assessmentConfig = assessmentAccess.data?.assessment;
   const attemptInfo = assessmentAccess.data?.attemptInfo;
   const remainingForAssessment = Math.max(0, totalRequired - verifiedCount);
-  const assessmentUnlocked = assessmentAccess.data?.unlocked || remainingForAssessment === 0;
+  const assessmentUnlocked = Boolean(course.data?.enrollment_status && assessmentAccess.data?.unlocked);
+  const coursePrice = Number(course.data?.price ?? 0);
+  const isEnrolled = Boolean(course.data?.enrollment_status);
 
   useEffect(() => {
     if (!selectedMaterialId && materialRows.length) {
       setSelectedMaterialId(nextIncomplete?.id ?? materialRows[0].id);
     }
   }, [materialRows, nextIncomplete?.id, selectedMaterialId]);
+
+  useEffect(() => {
+    if (!canViewContent && materialRows.length) {
+      setSelectedMaterialId("");
+    }
+  }, [canViewContent, materialRows.length]);
 
   return (
     <DashboardLayout>
@@ -206,6 +264,22 @@ const CourseDetail = () => {
                     <span>{course.data.credits} credits</span>
                     {course.data.duration && <span>{course.data.duration}</span>}
                     {course.data.instructor && <span>{course.data.instructor}</span>}
+                  </div>
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
+                    {statusMessage && <p className="w-full rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">{statusMessage}</p>}
+                    {courseAction.error && <p className="w-full rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{courseAction.error.message}</p>}
+                    {!isEnrolled ? (
+                      <Button disabled={courseAction.isPending} onClick={() => courseAction.mutate()}>
+                        {coursePrice > 0 ? "Buy now" : "Enroll free"}
+                      </Button>
+                    ) : (
+                      <Button asChild>
+                        <Link to={`/courses/${id}`}>Continue learning</Link>
+                      </Button>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {coursePrice > 0 ? `Secure checkout via Stripe. Access unlocks after payment confirmation.` : "Free course — enroll to start immediately."}
+                    </p>
                   </div>
                 </div>
                 <div className="rounded-lg border border-border bg-secondary/30 p-4 shadow-sm">
@@ -241,12 +315,12 @@ const CourseDetail = () => {
                       <button
                         key={material.id}
                         type="button"
-                        onClick={() => setSelectedMaterialId(material.id)}
+                        onClick={() => canViewContent ? setSelectedMaterialId(material.id) : setStatusMessage("Please purchase this course to unlock all learning materials, assessments, and certification.")}
                         className={`w-full rounded-lg border p-3 text-left transition hover:scale-[1.01] hover:shadow-sm ${active ? "border-primary bg-primary/5" : "border-border bg-background"}`}
                       >
                         <div className="flex items-start gap-3">
                           <div className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full ${complete ? "bg-success/10 text-success" : active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                            {complete ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                            {complete ? <CheckCircle2 className="h-4 w-4" /> : !canViewContent ? <LockKeyhole className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
@@ -265,7 +339,7 @@ const CourseDetail = () => {
 
               <div className="space-y-6">
                 <section className="rounded-xl border border-border bg-card p-6">
-                  {selectedMaterial ? (
+                  {canViewContent && selectedMaterial ? (
                     <>
                       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
@@ -312,7 +386,7 @@ const CourseDetail = () => {
                       </div>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No learning materials are available for this course yet.</p>
+                    <p className="text-sm text-muted-foreground">Please purchase this course to unlock all learning materials, assessments, and certification.</p>
                   )}
                 </section>
 

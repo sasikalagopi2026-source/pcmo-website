@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Check, ChevronDown, Crown, GraduationCap, Sparkles, UserRound, Users } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -75,9 +75,17 @@ const Membership = () => {
 
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
-      setMessage("Payment received. Your paid membership will show as active once Stripe confirmation is processed.");
-      void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
-      void queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      const sessionId = searchParams.get("session_id") || searchParams.get("sessionId");
+      if (!sessionId) { setMessage("Payment confirmation is missing. Please refresh or contact support."); return; }
+      setMessage("Confirming your membership payment...");
+      void api<{ success: boolean }>("/api/stripe/confirm-session", { method: "POST", body: JSON.stringify({ sessionId }) })
+        .then(() => {
+          setMessage("Your membership is active. Your current plan has been updated.");
+          void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
+          void queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+          void queryClient.invalidateQueries({ queryKey: ["membership-plans"] });
+        })
+        .catch((error: Error) => setMessage(error.message || "We could not confirm your membership payment yet."));
     }
     if (searchParams.get("payment") === "cancelled") {
       setMessage("Payment was cancelled. Your paid membership was not activated.");
@@ -142,7 +150,7 @@ const Membership = () => {
             <div className="grid min-w-[900px] gap-4" style={{ gridTemplateColumns: `180px repeat(${orderedPlans.length}, minmax(150px, 1fr))` }}>
               <strong>Plan</strong>{orderedPlans.map((plan) => <strong key={plan.id}>{plan.name}</strong>)}
               <span className="text-sm text-muted-foreground">Price</span>{orderedPlans.map((plan) => <span key={plan.id} className="text-sm font-semibold">{Number(plan.price ?? 0) === 0 ? "Free" : format(Number(plan.price))}</span>)}
-              <span className="text-sm text-muted-foreground">Top benefits</span>{orderedPlans.map((plan) => <ul key={plan.id} className="space-y-1 text-sm">{(plan.benefits ?? []).map((benefit) => <li key={benefit}>✓ {benefit}</li>)}</ul>)}
+              <span className="text-sm text-muted-foreground">Top benefits</span>{orderedPlans.map((plan) => <ul key={plan.id} className="space-y-1 text-sm">{(plan.benefits ?? []).map((benefit) => <li key={benefit}>âœ“ {benefit}</li>)}</ul>)}
             </div>
           </div>
         </details>
@@ -152,3 +160,4 @@ const Membership = () => {
 };
 
 export default Membership;
+

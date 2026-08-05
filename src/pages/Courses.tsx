@@ -19,9 +19,21 @@ const Courses = () => {
     queryFn: () => api<LiveCourse[]>("/api/courses"),
   });
   const enrollment = useMutation({
-    mutationFn: ({ id, enrolled }: { id: string; enrolled: boolean }) =>
-      api(`/api/courses/${id}/enroll`, { method: enrolled ? "DELETE" : "POST" }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["courses"] }),
+    mutationFn: ({ id, enrolled, price }: { id: string; enrolled: boolean; price: number }) => {
+      if (enrolled) return api<{ checkoutUrl?: string; status?: string }>(`/api/courses/${id}/enroll`, { method: "DELETE" });
+      if (price > 0) return api<{ checkoutUrl?: string; status?: string }>(`/api/courses/${id}/checkout`, { method: "POST" });
+      return api<{ checkoutUrl?: string; status?: string }>(`/api/courses/${id}/enroll`, { method: "POST" });
+    },
+    onSuccess: (result, variables) => {
+      if (result?.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
+      void queryClient.invalidateQueries({ queryKey: ["courses"] });
+      if (!variables.enrolled) {
+        void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
+      }
+    },
   });
 
   const enrolled = courses.filter((course) => course.enrollment_status);
@@ -62,8 +74,8 @@ const Courses = () => {
                     <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{course.level}</span><span>{course.credits} credits</span><span>{course.duration}</span><span className="font-semibold text-primary">{Number(course.price ?? 0) > 0 ? `Paid · ${format(Number(course.price))}` : "Free"}</span></div>
                   </div>
                 </div>
-                <Button className="mt-4 w-full" variant={course.enrollment_status ? "outline" : "default"} disabled={enrollment.isPending} onClick={() => enrollment.mutate({ id: course.id, enrolled: Boolean(course.enrollment_status) })}>
-                  {course.enrollment_status ? "Leave course" : "Enroll now"}
+                <Button className="mt-4 w-full" variant={course.enrollment_status ? "outline" : "default"} disabled={enrollment.isPending} onClick={() => enrollment.mutate({ id: course.id, enrolled: Boolean(course.enrollment_status), price: Number(course.price ?? 0) })}>
+                  {course.enrollment_status ? "Leave course" : Number(course.price ?? 0) > 0 ? "Buy now" : "Enroll now"}
                 </Button>
                 {course.enrollment_status && (
                   <Button asChild className="mt-2 w-full">

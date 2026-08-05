@@ -22,6 +22,7 @@ import { config } from "./config.js";
 import { db, pingDatabase } from "./db.js";
 import { jsonFields, resources } from "./resources.js";
 import { buildPurchaseConfirmationEmailPayload, buildWelcomeEmailPayload } from "./email.js";
+import { getCourseCheckoutCancelUrl, getCourseCheckoutSuccessUrl, isCourseEnrolled, isPaidCourse } from "./courseCheckout.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -328,6 +329,14 @@ const hasActiveCertificate = async (userId: string, courseId: string) => {
   const [rows] = await db.execute<RowDataPacket[]>(
     "SELECT 1 FROM certifications WHERE user_id = ? AND course_id = ? AND status = 'active' LIMIT 1",
     [userId, courseId],
+  );
+  return Boolean(rows[0]);
+};
+
+const hasActiveMembership = async (userId: string) => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    "SELECT 1 FROM memberships WHERE user_id = ? AND status = 'active' AND (ends_at IS NULL OR ends_at >= CURDATE()) LIMIT 1",
+    [userId],
   );
   return Boolean(rows[0]);
 };
@@ -770,7 +779,45 @@ const syncCertifiedCourseCompletions = async (userId?: string) => {
     if (seen.has(key)) continue;
     seen.add(key);
     await completeCourseEnrollment(String(certificate.user_id), String(certificate.course_id));
+    await awardCourseCredits(String(certificate.user_id), String(certificate.course_id));
   }
+};
+
+const creditAchievementLevels = [
+  { name: "Bronze Member", threshold: 25, icon: "\u{1F949}", color: "#a16207" },
+  { name: "Silver Member", threshold: 50, icon: "\u{1F948}", color: "#64748b" },
+  { name: "Gold Member", threshold: 100, icon: "\u{1F947}", color: "#ca8a04" },
+  { name: "Platinum Member", threshold: 200, icon: "\u{1F48E}", color: "#0f766e" },
+  { name: "PCMO Fellow", threshold: 500, icon: "\u{1F451}", color: "#7e22ce" },
+];
+
+const awardCourseCredits = async (userId: string, courseId: string) => {
+  const [courses] = await db.execute<RowDataPacket[]>("SELECT title, credits FROM courses WHERE id = ? LIMIT 1", [courseId]);
+  const course = courses[0];
+  const credits = Math.max(0, Number(course?.credits ?? 0));
+  if (course && credits > 0) {
+    const [result] = await db.execute<OkPacket>(
+      "INSERT IGNORE INTO member_credit_awards (id, user_id, course_id, credits) VALUES (?, ?, ?, ?)",
+      [randomUUID(), userId, courseId, credits],
+    );
+    if (result.affectedRows > 0) {
+      await createNotification(userId, "Learning credits added", `${credits} credits were added for completing ${course.title}.`, "achievement", "/");
+      await trackMemberActivity(userId, "course_credits_awarded", "courses", courseId, { credits });
+    }
+  }
+  const [totals] = await db.execute<RowDataPacket[]>("SELECT COALESCE(SUM(credits), 0) total FROM member_credit_awards WHERE user_id = ?", [userId]);
+  const total = Number(totals[0]?.total ?? 0);
+  for (const level of creditAchievementLevels.filter((item) => total >= item.threshold)) {
+    const [existing] = await db.execute<RowDataPacket[]>("SELECT id FROM member_badges WHERE user_id = ? AND name = ? AND status = 'active' LIMIT 1", [userId, level.name]);
+    if (!existing[0]) {
+      await db.execute(
+        "INSERT INTO member_badges (id, user_id, name, description, icon, color, issued_by, issued_at, status) VALUES (?, ?, ?, ?, ?, ?, 'PCMO', CURDATE(), 'active')",
+        [randomUUID(), userId, level.name, `Earned ${level.threshold}+ learning credits.`, level.icon, level.color],
+      );
+      await createNotification(userId, "Achievement unlocked", `${level.icon} You are now a ${level.name}.`, "achievement", "/community-profile");
+    }
+  }
+  return total;
 };
 
 const activateStripeMembership = async (session: Stripe.Checkout.Session) => {
@@ -939,6 +986,39 @@ const activateStripeBookPurchase = async (session: Stripe.Checkout.Session) => {
   io.to(`user:${userId}`).emit("book-purchases:changed", { purchaseId, bookId, status: "paid" });
 };
 
+const activateStripeCourseEnrollment = async (session: Stripe.Checkout.Session) => {
+  const userId = session.metadata?.userId;
+  const courseId = session.metadata?.courseId;
+  if (!userId || !courseId || session.payment_status !== "paid") return;
+
+  const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+  await db.execute(
+    `INSERT INTO course_payments (id, user_id, course_id, amount, currency, status, stripe_checkout_session_id, stripe_payment_intent_id, paid_at)
+     VALUES (?, ?, ?, ?, ?, 'paid', ?, ?, NOW())
+     ON DUPLICATE KEY UPDATE status='paid', stripe_checkout_session_id=VALUES(stripe_checkout_session_id), stripe_payment_intent_id=VALUES(stripe_payment_intent_id), paid_at=COALESCE(paid_at, NOW())`,
+    [randomUUID(), userId, courseId, Number(session.amount_total ?? 0) / 100, String(session.currency ?? "usd").toUpperCase(), session.id, paymentIntentId],
+  );
+
+  const [rows] = await db.execute<RowDataPacket[]>(
+    "SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? LIMIT 1",
+    [userId, courseId],
+  );
+  if (rows[0]?.id) {
+    await db.execute(
+      "UPDATE course_enrollments SET status = 'active', progress = 0, last_viewed_at = COALESCE(last_viewed_at, NOW()) WHERE user_id = ? AND course_id = ?",
+      [userId, courseId],
+    );
+  } else {
+    await db.execute(
+      "INSERT INTO course_enrollments (id, user_id, course_id, status, progress) VALUES (?, ?, ?, 'active', 0)",
+      [randomUUID(), userId, courseId],
+    );
+  }
+  await audit(userId, "stripe_checkout_completed", "courses", courseId, { sessionId: session.id, checkoutType: "course" });
+  await trackMemberActivity(userId, "course_enrollment", "courses", courseId, { sessionId: session.id, checkoutType: "course" });
+  io.to(`user:${userId}`).emit("enrollment:changed", { courseId });
+};
+
 const activateStripeBookCartPurchase = async (session: Stripe.Checkout.Session) => {
   const userId = session.metadata?.userId;
   let purchaseIds: string[] = [];
@@ -993,6 +1073,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async
     const session = event.data.object as Stripe.Checkout.Session;
     if (session.metadata?.checkoutType === "book") await activateStripeBookPurchase(session);
     else if (session.metadata?.checkoutType === "book-cart") await activateStripeBookCartPurchase(session);
+    else if (session.metadata?.checkoutType === "course") await activateStripeCourseEnrollment(session);
     else await activateStripeMembership(session);
   }
   res.json({ received: true });
@@ -1020,6 +1101,7 @@ app.post("/api/stripe/confirm-session", requireAuth, asyncRoute(async (req, res)
   try {
     if (session.metadata?.checkoutType === "book") await activateStripeBookPurchase(session);
     else if (session.metadata?.checkoutType === "book-cart") await activateStripeBookCartPurchase(session);
+    else if (session.metadata?.checkoutType === "course") await activateStripeCourseEnrollment(session);
     else await activateStripeMembership(session);
   } catch (err) {
     // don't fail the request if activation throws; webhook will still reconcile
@@ -1331,7 +1413,7 @@ app.get("/api/student/dashboard", requireAuth, asyncRoute(async (req, res) => {
     ),
     db.execute<RowDataPacket[]>(
       `SELECT
-       (SELECT COUNT(*) FROM course_enrollments WHERE user_id = ?) courses,
+       (SELECT COUNT(*) FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id WHERE ce.user_id = ? AND (COALESCE(c.price,0)=0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid'))) courses,
        (SELECT COUNT(*) FROM certifications WHERE user_id = ?) certificates,
        (SELECT COUNT(*) FROM quiz_attempts WHERE user_id = ?) assignments,
        (SELECT COUNT(*) FROM notifications WHERE user_id = ? AND read_at IS NULL) notifications`,
@@ -1344,7 +1426,7 @@ app.get("/api/student/dashboard", requireAuth, asyncRoute(async (req, res) => {
     db.execute<RowDataPacket[]>(
       `SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at
        FROM course_enrollments ce JOIN courses c ON c.id = ce.course_id
-       WHERE ce.user_id = ? ORDER BY ce.enrolled_at DESC`,
+       WHERE ce.user_id = ? AND (COALESCE(c.price,0)=0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid')) ORDER BY ce.enrolled_at DESC`,
       [userId],
     ),
     db.execute<RowDataPacket[]>(
@@ -1356,6 +1438,9 @@ app.get("/api/student/dashboard", requireAuth, asyncRoute(async (req, res) => {
       [userId],
     ),
   ]);
+  const [creditRows] = await db.execute<RowDataPacket[]>("SELECT COALESCE(SUM(credits), 0) total FROM member_credit_awards WHERE user_id = ?", [userId]);
+  const credits = Number(creditRows[0]?.total ?? 0);
+  statsRows[0].credits = credits;
   res.json({
     profile: profileRows[0] ?? null,
     stats: statsRows[0] ?? { courses: 0, certificates: 0, assignments: 0, notifications: 0 },
@@ -1642,11 +1727,82 @@ app.post("/api/membership/checkout", requireAuth, asyncRoute(async (req, res) =>
   res.status(201).json(response);
 }));
 
+app.post("/api/courses/:id/checkout", requireAuth, asyncRoute(async (req, res) => {
+  const courseId = routeParam(req.params.id);
+  const [rows] = await db.execute<RowDataPacket[]>(
+    `SELECT id, title, description, price, status FROM courses WHERE id = ? AND status = 'published' LIMIT 1`,
+    [courseId],
+  );
+  const course = rows[0];
+  if (!course) return res.status(404).json({ error: "Course not found" });
+
+  const price = Number(course.price ?? 0);
+  if (!isPaidCourse(price)) {
+    const [existing] = await db.execute<RowDataPacket[]>(
+      "SELECT id FROM course_enrollments WHERE user_id = ? AND course_id = ? AND status IN ('active', 'completed') LIMIT 1",
+      [req.user!.id, courseId],
+    );
+    if (existing[0] && "id" in existing[0] && existing[0].id) return res.json({ status: "active", existing: true });
+    const id = randomUUID();
+    await db.execute(
+      `INSERT INTO course_enrollments (id, user_id, course_id, status, progress)
+       VALUES (?, ?, ?, 'active', 0) ON DUPLICATE KEY UPDATE status = 'active', progress = 0`,
+      [id, req.user!.id, courseId],
+    );
+    await audit(req.user!.id, "enroll", "courses", courseId);
+    await trackMemberActivity(req.user!.id, "course_enrollment", "courses", courseId);
+    io.to(`user:${req.user!.id}`).emit("enrollment:changed", { courseId });
+    return res.status(201).json({ status: "active", success: true });
+  }
+
+  if (!stripe) return res.status(503).json({ error: "Stripe is not configured. Add STRIPE_SECRET_KEY to the API environment." });
+  const [existing] = await db.execute<RowDataPacket[]>(
+    "SELECT ce.id FROM course_enrollments ce JOIN course_payments cp ON cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid' WHERE ce.user_id = ? AND ce.course_id = ? AND ce.status IN ('active', 'completed') LIMIT 1",
+    [req.user!.id, courseId],
+  );
+  if (existing[0] && "id" in existing[0] && existing[0].id) return res.json({ status: "active", existing: true });
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: req.user!.email,
+    line_items: [{
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        product_data: { name: String(course.title ?? "Course"), description: String(course.description ?? "PCMO course access") },
+        unit_amount: Math.round(price * 100),
+      },
+    }],
+    success_url: getCourseCheckoutSuccessUrl(config.clientUrl, courseId),
+    cancel_url: getCourseCheckoutCancelUrl(config.clientUrl, courseId),
+    metadata: {
+      checkoutType: "course",
+      courseId,
+      userId: req.user!.id,
+      courseTitle: String(course.title ?? "Course"),
+    },
+  });
+  await trackMemberActivity(req.user!.id, "course_checkout_started", "courses", courseId, { sessionId: session.id, amount: price });
+  await db.execute(
+    `INSERT INTO course_payments (id, user_id, course_id, amount, currency, status, stripe_checkout_session_id)
+     VALUES (?, ?, ?, ?, 'USD', 'pending', ?)
+     ON DUPLICATE KEY UPDATE amount=VALUES(amount), status='pending', stripe_checkout_session_id=VALUES(stripe_checkout_session_id)`,
+    [randomUUID(), req.user!.id, courseId, price, session.id],
+  );
+  res.status(201).json({ checkoutUrl: session.url, sessionId: session.id, status: "pending" });
+}));
+
 app.post("/api/courses/:id/enroll", requireAuth, asyncRoute(async (req, res) => {
   const id = randomUUID();
+  const courseId = routeParam(req.params.id);
+  const [courses] = await db.execute<RowDataPacket[]>("SELECT price FROM courses WHERE id = ? AND status = 'published' LIMIT 1", [courseId]);
+  if (!courses[0]) return res.status(404).json({ error: "Course not found" });
+  if (isPaidCourse(courses[0].price)) {
+    return res.status(403).json({ error: "Please purchase this course to unlock all learning materials, assessments, and certification." });
+  }
   await db.execute(
-    `INSERT INTO course_enrollments (id, user_id, course_id)
-     VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = 'active'`,
+    `INSERT INTO course_enrollments (id, user_id, course_id, status, progress)
+     VALUES (?, ?, ?, 'active', 0) ON DUPLICATE KEY UPDATE status = 'active', progress = 0`,
     [id, req.user!.id, routeParam(req.params.id)],
   );
   await audit(req.user!.id, "enroll", "courses", routeParam(req.params.id));
@@ -1668,7 +1824,7 @@ app.get("/api/courses", requireAuth, asyncRoute(async (req, res) => {
     `SELECT c.*, ce.progress, ce.status enrollment_status, ce.enrolled_at, ce.last_viewed_at,
       COALESCE((SELECT 1 FROM certifications cert WHERE cert.user_id = ? AND cert.course_id = c.id AND cert.status = 'active' LIMIT 1), 0) has_certificate
      FROM courses c
-     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
+     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ? AND (COALESCE(c.price, 0) = 0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id = ce.user_id AND cp.course_id = ce.course_id AND cp.status = 'paid'))
      WHERE c.status = 'published'
      ORDER BY c.updated_at DESC`,
     [req.user!.id, req.user!.id],
@@ -1686,7 +1842,7 @@ app.get("/api/courses/:id", requireAuth, asyncRoute(async (req, res) => {
       (SELECT COUNT(*) FROM course_module_progress cmp WHERE cmp.course_id = c.id AND cmp.user_id = ?) completed_module_count,
       COALESCE((SELECT 1 FROM certifications cert WHERE cert.user_id = ? AND cert.course_id = c.id AND cert.status = 'active' LIMIT 1), 0) has_certificate
      FROM courses c
-     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ?
+     LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ? AND (COALESCE(c.price, 0) = 0 OR EXISTS (SELECT 1 FROM course_payments cp WHERE cp.user_id = ce.user_id AND cp.course_id = ce.course_id AND cp.status = 'paid'))
      WHERE c.id = ?
      LIMIT 1`,
     [req.user!.id, req.user!.id, req.user!.id, courseId],
@@ -1694,10 +1850,21 @@ app.get("/api/courses/:id", requireAuth, asyncRoute(async (req, res) => {
   const course = rows[0];
   if (!course) return res.status(404).json({ error: "Course not found" });
   if (!admin && course.status !== "published") return res.status(404).json({ error: "Course not found" });
-  if (!admin && !["active", "completed"].includes(course.enrollment_status)) {
-    return res.status(403).json({ error: "Enroll in this course before viewing its content" });
-  }
   res.json(parseJsonFields(course));
+}));
+
+app.get("/api/courses/:id/materials", requireAuth, asyncRoute(async (req, res) => {
+  const courseId = routeParam(req.params.id);
+  const admin = ["admin", "super_admin"].includes(req.user!.role);
+  const [enrollments, materials] = await Promise.all([
+    db.execute<RowDataPacket[]>("SELECT ce.id FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id LEFT JOIN course_payments cp ON cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid' WHERE ce.user_id = ? AND ce.course_id = ? AND ce.status IN ('active', 'completed') AND (COALESCE(c.price,0)=0 OR cp.id IS NOT NULL) LIMIT 1", [req.user!.id, courseId]),
+    db.execute<RowDataPacket[]>("SELECT id, material_type, title, description, content_url, body, duration, sort_order FROM course_materials WHERE course_id = ? AND status = 'published' ORDER BY sort_order, created_at", [courseId]),
+  ]);
+  const unlocked = admin || Boolean(enrollments[0][0]);
+  const rows = unlocked ? materials[0] : materials[0].map((material) => ({
+    id: material.id, material_type: material.material_type, title: material.title, description: material.description, duration: material.duration, locked: true,
+  }));
+  res.json({ rows, unlocked });
 }));
 
 app.put("/api/courses/:courseId/modules/:materialId/progress", requireAuth, asyncRoute(async (req, res) => {
@@ -1740,6 +1907,7 @@ app.put("/api/courses/:courseId/modules/:materialId/progress", requireAuth, asyn
     [progress, progress >= 100 ? "completed" : "active", req.user!.id, courseId],
   );
   await trackMemberActivity(req.user!.id, input.completed ? "module_completed" : "module_reopened", "courses", courseId, { materialId, progress });
+  if (progress >= 100) await awardCourseCredits(req.user!.id, courseId);
   io.emit("course-progress:changed", { userId: req.user!.id, courseId, materialId, progress });
   res.json({ completed, total, progress });
 }));
@@ -2103,7 +2271,17 @@ app.delete("/api/expert-rooms/:id/reserve", requireAuth, asyncRoute(async (req, 
   res.status(204).end();
 }));
 
+app.get("/api/webinars/access", requireAuth, asyncRoute(async (req, res) => {
+  const active = ["admin", "super_admin"].includes(req.user!.role) || await hasActiveMembership(req.user!.id);
+  res.json({ active });
+}));
+
 app.post("/api/events/:id/register", requireAuth, asyncRoute(async (req, res) => {
+  const [events] = await db.execute<RowDataPacket[]>("SELECT event_type FROM events WHERE id = ? LIMIT 1", [routeParam(req.params.id)]);
+  if (!events[0]) return res.status(404).json({ error: "Event not found" });
+  if (String(events[0].event_type).toLowerCase() === "webinar" && !["admin", "super_admin"].includes(req.user!.role) && !(await hasActiveMembership(req.user!.id))) {
+    return res.status(403).json({ error: "An active membership is required to access webinars." });
+  }
   await db.execute(
     `INSERT INTO event_registrations (id, user_id, event_id)
      VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = 'registered'`,
@@ -2364,7 +2542,9 @@ app.get("/api/books/:id/download/:index", requireAuth, asyncRoute(async (req, re
   await db.execute("UPDATE library_contents SET downloads = downloads + 1 WHERE id = ?", [bookId]);
   await trackMemberActivity(req.user!.id, "book_file_download", "library_contents", bookId, { attachment: attachment.name ?? index });
   io.emit("library:changed", { action: "download", id: bookId });
-  res.download(absolutePath, attachment.name || `${String(parsed.title ?? "ebook")}-${index + 1}`);
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "inline");
+  res.sendFile(absolutePath);
 }));
 
 app.get("/api/books/purchases", requireAuth, asyncRoute(async (req, res) => {
@@ -2620,6 +2800,15 @@ app.get("/api/resources/:resource", requireAuth, asyncRoute(async (req, res) => 
   if (!resource.publicRead && !resource.ownerField && !["admin", "super_admin"].includes(req.user!.role)) {
     return res.status(403).json({ error: "Administrator access required" });
   }
+  if (resourceName === "course-materials" && !["admin", "super_admin"].includes(req.user!.role)) {
+    const courseId = String(req.query.course_id ?? "");
+    const [enrollments] = await db.execute<RowDataPacket[]>(
+      "SELECT ce.id FROM course_enrollments ce JOIN courses c ON c.id=ce.course_id LEFT JOIN course_payments cp ON cp.user_id=ce.user_id AND cp.course_id=ce.course_id AND cp.status='paid' WHERE ce.user_id = ? AND ce.course_id = ? AND ce.status IN ('active', 'completed') AND (COALESCE(c.price,0)=0 OR cp.id IS NOT NULL) LIMIT 1",
+      [req.user!.id, courseId],
+    );
+    if (!enrollments[0]) return res.status(403).json({ error: "Please purchase this course to unlock all learning materials, assessments, and certification." });
+  }
+
   if (resourceName === "certifications") {
     const userId = ["admin", "super_admin"].includes(req.user!.role) ? undefined : req.user!.id;
     await backfillPassedCertificates(userId);
