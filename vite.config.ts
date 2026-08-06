@@ -19,10 +19,28 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  // Force the correct NODE_ENV for the dependency optimizer (pre-bundling).
+  // If the shell has NODE_ENV=production (e.g. after a prior `npm run build`),
+  // Vite's optimizer would resolve react/jsx-dev-runtime to its production
+  // build where jsxDEV is undefined, causing "_jsxDEV is not a function" and a
+  // blank page in dev. Defining it here (driven by Vite's `mode`) makes the dev
+  // server robust regardless of the ambient environment variable.
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        "process.env.NODE_ENV": JSON.stringify(mode === "development" ? "development" : "production"),
+      },
+    },
+  },
+  esbuild: {
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(mode === "development" ? "development" : "production"),
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
+    dedupe: ["react", "react-dom", "@tanstack/react-query", "@tanstack/query-core"],
   },
 }));

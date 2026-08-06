@@ -48,3 +48,15 @@ The database definition is [server/schema.sql](server/schema.sql). The server ne
 npm run typecheck:api
 npm run build
 ```
+
+## Production build (clean environment)
+
+`server-dist/` is gitignored, so on a fresh clone you must run the build before starting the production server:
+
+```bash
+npm ci
+npm run build
+npm start
+```
+
+`npm run build` compiles both the Vite client (`dist/`) and the TypeScript API (`server-dist/`). `npm start` runs `node server-dist/index.js`, which serves the built frontend, the API, and static uploads from one origin. Webinar media lives in `public/webinars/` (copied into `dist/webinars/` at build time) and publication PDFs are served from `output/pdf/`.

@@ -13,6 +13,9 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server-dist ./server-dist
 COPY --from=build /app/server/schema.sql ./server-dist/schema.sql
-COPY --from=build /app/server/webinars ./server-dist/webinars
+COPY --from=build /app/output ./output
+COPY --from=build /app/public/webinars ./dist/webinars
+# The dist directory already contains webinars copied from public/webinars during the Vite build.
+# The explicit COPY above is a safety net for environments where the build skips static assets.
 EXPOSE 3001
 CMD ["npm", "start"]

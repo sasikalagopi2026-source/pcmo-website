@@ -24,8 +24,23 @@ The local frontend proxies API calls to port 3001. Production serves the built f
 2. Copy `.env.production.example` to `.env.production`; set every placeholder to a unique production value and replace `portal.example.com` with the real domain.
 3. Generate a JWT secret with `openssl rand -base64 48` and store it only in `.env.production` or your secret manager.
 4. Build and start: `docker compose -f docker-compose.production.yml up -d --build`.
+
+   > **Note:** The Docker build runs `npm run build` (which compiles both the Vite client to `dist/` and the TypeScript API to `server-dist/`), then copies the built output, webinar media (`public/webinars`), publication PDFs (`output/pdf`), and the database schema into the production image. `npm start` runs `node server-dist/index.js`.
+
 5. Create the initial administrator once: `docker compose -f docker-compose.production.yml run --rm app npm run db:create-admin:prod`.
 6. Confirm `https://YOUR_DOMAIN/api/health` returns `status: ok`, then test login, an upload, realtime updates, and a full Stripe test/live checkout as appropriate.
+
+### Running the production build outside Docker (e.g. on a clean PC)
+
+If you want to verify the production build on a clean machine (without Docker), run:
+
+```bash
+npm ci        # installs exact dependencies from package-lock.json
+npm run build # compiles client (dist/) and API (server-dist/)
+npm start     # starts node server-dist/index.js
+```
+
+`server-dist/` is gitignored, so it is generated fresh by `npm run build` on every clean clone. The production server serves the built frontend from `dist/` and the API/static uploads from the same origin.
 
 Caddy obtains and renews TLS certificates automatically once DNS and ports 80/443 are correct. It exposes only HTTPS/HTTP; MySQL remains on Docker's internal network. The API process, uploads, MySQL data, and certificates all use persistent Docker volumes.
 

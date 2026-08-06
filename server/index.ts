@@ -2418,7 +2418,7 @@ app.get("/api/webinars/access", requireAuth, asyncRoute(async (req, res) => {
   res.json({ active });
 }));
 
-const webinarMediaDirectory = path.resolve(config.isProduction ? "server-dist" : "server", "webinars", "series-1");
+const webinarMediaDirectory = path.resolve(config.isProduction ? "dist" : "public", "webinars", "series-1");
 const requireWebinarAuth: express.RequestHandler = (req, res, next) => {
   const token = typeof req.query.token === "string" ? req.query.token : "";
   if (!req.headers.authorization && token) req.headers.authorization = `Bearer ${token}`;
