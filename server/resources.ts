@@ -10,6 +10,8 @@ export type ResourceConfig = {
 };
 
 export const resources: Record<string, ResourceConfig> = {
+  "website-activities": { table: "website_activity_records", fields: ["activity_type", "user_id", "user_name", "email", "submitted_data", "status", "ip_address", "user_agent", "notification_status", "notification_attempts", "notification_error", "notified_at"], searchable: ["activity_type", "user_name", "email", "status", "notification_status", "notification_error"], orderBy: "created_at" },
+  "newsletter-subscribers": { table: "newsletter_subscribers", fields: ["email", "status", "source", "ip_address", "user_agent", "metadata", "subscribed_at"], searchable: ["email", "status", "source"], orderBy: "subscribed_at" },
   "member-projects": { table: "member_projects", fields: ["user_id","title","role_title","organisation","description","skills","project_url","started_on","ended_on","status"], searchable: ["title","organisation","description"], ownerField: "user_id", studentCreate: true, studentUpdate: true },
   "member-connections": { table: "member_connections", fields: ["requester_id","recipient_id","status","message","responded_at"], searchable: ["status","message"] },
   "member-badges": { table: "member_badges", fields: ["user_id","name","description","icon","color","issued_by","issued_at","status"], searchable: ["name","description"], ownerField: "user_id" },

@@ -34,6 +34,8 @@ export const useRealtime = () => {
       "event-registration:changed",
       "profile:updated",
       "membership:changed",
+      "website-activity:changed",
+      "contact-messages:changed",
     ].forEach((event) => socket.on(event, refresh));
     return () => socket.disconnect();
   }, [queryClient]);

@@ -72,6 +72,7 @@ import PcmoSitemapPage from "./pages/PcmoSitemapPage.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 import { AuthProvider } from "./hooks/useAuth.tsx";
 import { useRealtime } from "./hooks/useRealtime.ts";
+import SiteAssistant from "./components/SiteAssistant.tsx";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => (
         <Sonner />
         <RealtimeBridge />
         <BrowserRouter>
+          <SiteAssistant />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<WebsiteHome />} />

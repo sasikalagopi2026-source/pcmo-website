@@ -1124,3 +1124,39 @@ CREATE TABLE IF NOT EXISTS course_payments (
   CONSTRAINT fk_course_payment_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_course_payment_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id CHAR(36) PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  status ENUM('active','unsubscribed','archived') NOT NULL DEFAULT 'active',
+  source VARCHAR(120) NOT NULL DEFAULT 'website_home',
+  ip_address VARCHAR(64),
+  user_agent VARCHAR(1000),
+  metadata JSON,
+  subscribed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_newsletter_subscriber_email (email),
+  KEY idx_newsletter_subscribers_status (status),
+  KEY idx_newsletter_subscribers_subscribed (subscribed_at)
+);
+
+CREATE TABLE IF NOT EXISTS website_activity_records (
+  id CHAR(36) PRIMARY KEY,
+  activity_type VARCHAR(120) NOT NULL,
+  user_id CHAR(36),
+  user_name VARCHAR(255),
+  email VARCHAR(255),
+  submitted_data JSON NOT NULL,
+  status ENUM('new','read','in_progress','completed','archived') NOT NULL DEFAULT 'new',
+  ip_address VARCHAR(64),
+  user_agent VARCHAR(1000),
+  notification_status ENUM('pending','sent','failed','not_configured') NOT NULL DEFAULT 'pending',
+  notification_attempts INT NOT NULL DEFAULT 0,
+  notification_error TEXT,
+  notified_at DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_website_activity_type_status (activity_type, status),
+  KEY idx_website_activity_email (email),
+  KEY idx_website_activity_created (created_at),
+  CONSTRAINT fk_website_activity_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);

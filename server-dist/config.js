@@ -27,6 +27,9 @@ export const config = {
     port: positiveNumber("API_PORT", 3001),
     clientOrigins: (process.env.CLIENT_ORIGIN ?? "http://localhost:8080,http://127.0.0.1:8080").split(",").map((origin) => origin.trim()).filter(Boolean),
     clientUrl: (process.env.CLIENT_URL ?? (process.env.CLIENT_ORIGIN ?? "http://localhost:8080").split(",")[0]).replace(/\/$/, ""),
+    activityNotifications: {
+        recipient: process.env.ACTIVITY_NOTIFICATION_EMAIL ?? "sasikala@petrocontracts.com",
+    },
     email: {
         smtpHost: process.env.SMTP_HOST ?? "",
         smtpPort: Number(process.env.SMTP_PORT ?? 587),

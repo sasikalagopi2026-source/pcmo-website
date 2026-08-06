@@ -1,3 +1,4 @@
+import { useState, type FormEvent } from "react";
 import {
   ArrowRight,
   Award,
@@ -18,6 +19,7 @@ import { Link } from "react-router-dom";
 import PcmoLogo from "@/components/PcmoLogo";
 import PublicFooter from "@/components/PublicFooter";
 import PublicNavigation from "@/components/PublicNavigation";
+import { api } from "@/lib/api";
 
 const site = "https://www.pcmo.world/";
 const image = (path: string) => `${site}${path.replace(/^\//, "")}`;
@@ -73,6 +75,25 @@ const ReadMore = ({ to }: { to: string }) => (
 );
 
 const WebsiteHome = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState("");
+  const [isNewsletterSubmitting, setIsNewsletterSubmitting] = useState(false);
+  const submitNewsletter = async (event: FormEvent) => {
+    event.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!email) return setNewsletterStatus("Enter your email address to subscribe.");
+    setIsNewsletterSubmitting(true);
+    setNewsletterStatus("");
+    try {
+      await api("/api/newsletter-subscriptions", { method: "POST", body: JSON.stringify({ email }) });
+      setNewsletterEmail("");
+      setNewsletterStatus("You're subscribed, thank you!!!");
+    } catch (error) {
+      setNewsletterStatus(error instanceof Error ? error.message : "We could not complete your subscription. Please try again.");
+    } finally {
+      setIsNewsletterSubmitting(false);
+    }
+  };
   const hero = undefined;
   const about = undefined;
   const benefitContent = undefined;
@@ -209,7 +230,7 @@ const WebsiteHome = () => {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-slate-900 px-6 py-14 text-center text-white"><img src={newsletter?.image_url || image("website/assets/img/banner/executives-paying-attention-digital-tablet.jpg")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20"/><div className="relative mx-auto max-w-3xl"><Mail className="mx-auto h-8 w-8 text-red-500"/><h2 className="mt-3 font-heading text-2xl font-extrabold uppercase">{newsletter?.title || "Get the Latest Delivered to Your Inbox"}</h2><p className="mt-3 text-sm text-white/70">{newsletter?.body || "Subscribe to our newsletter and stay informed about the latest industry news, events, and opportunities."}</p><form className="mx-auto mt-6 flex max-w-xl" onSubmit={(event) => event.preventDefault()}><input type="email" aria-label="Email address" placeholder="Your Email" className="min-w-0 flex-1 rounded-l px-4 py-3 text-sm text-slate-900 outline-none"/><button className="rounded-r bg-red-600 px-6 font-bold text-white" type="submit">{newsletter?.action_label || "Join"}</button></form></div></section>
+      <section className="relative overflow-hidden bg-slate-900 px-6 py-14 text-center text-white"><img src={newsletter?.image_url || image("website/assets/img/banner/executives-paying-attention-digital-tablet.jpg")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20"/><div className="relative mx-auto max-w-3xl"><Mail className="mx-auto h-8 w-8 text-red-500"/><h2 className="mt-3 font-heading text-2xl font-extrabold uppercase">{newsletter?.title || "Get the Latest Delivered to Your Inbox"}</h2><p className="mt-3 text-sm text-white/70">{newsletter?.body || "Subscribe to our newsletter and stay informed about the latest industry news, events, and opportunities."}</p><form className="mx-auto mt-6 max-w-xl" onSubmit={submitNewsletter}><div className="flex"><input type="email" required value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} aria-label="Email address" placeholder="Your Email" className="min-w-0 flex-1 rounded-l px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-red-400"/><button disabled={isNewsletterSubmitting} className="rounded-r bg-red-600 px-6 font-bold text-white disabled:cursor-not-allowed disabled:opacity-70" type="submit">{isNewsletterSubmitting ? "Joining�" : newsletter?.action_label || "Join"}</button></div>{newsletterStatus && <p role="status" className="mt-3 text-sm font-medium text-white">{newsletterStatus}</p>}</form></div></section>
 
       <section className="px-6 py-16"><SectionTitle title={certificationContent?.title || "Featured Certifications"} text={certificationContent?.body || "Our featured certification programs recognize knowledge, skills, and professional competency through rigorous standards."}/><div className="mx-auto mt-10 grid max-w-5xl gap-6 md:grid-cols-3">{['PCMO Project+','PCMO Network+','PCMO Security+'].map((title)=><article key={title} className="rounded border p-7 text-center shadow-sm"><ShieldCheck className="mx-auto h-14 w-14 text-[#0b3764]"/><h3 className="mt-4 font-bold text-[#0b3764]">{title}</h3><p className="mt-3 text-xs leading-6 text-slate-600">Industry-endorsed certification designed to validate practical knowledge and professional capability.</p></article>)}</div></section>
 
