@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS pcmo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+﻿CREATE DATABASE IF NOT EXISTS pcmo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE pcmo;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -557,7 +557,7 @@ INSERT INTO website_pages
 VALUES
   ('30000000-0000-4000-8000-000000000001', 'primary', 'About PCMO', 'about', 'About Us',
    'Advancing the professions of project and contracts management through knowledge, certification, collaboration, mentorship, and an inclusive global community.',
-   'About Us\n\nWelcome to the Project and Contracts Management Organisation (PCMO), where we dedicate ourselves to advancing the professions of project and contracts management. At PCMO, we understand the pivotal role these disciplines play across industries, and we commit to fostering growth, innovation, and excellence in these fields. Our community includes professionals and students from the energy sector, infrastructure, IT, and beyond.\n\nWe serve the industry by providing forums for collaboration, mentorship, and best practices. We also provide skills validation through our globally recognized training and certification products and insights from world-class industry research. We are passionately committed to diversity and inclusion.\n\nJoin the PCMO Community Today\n\nReady to take your project and contracts management skills to the next level? Join PCMO today and be part of a community driving excellence and innovation in the industry.\n\nWhy Choose Us?\n\nPCMO is home to respected and experienced professionals in the project and contracts management sectors. Our instructors, speakers, and mentors bring real-world insights, cutting-edge knowledge, and a passion for teaching.\n\nWhether you are seeking certification, enhancing specific skills, or exploring industry trends, PCMO offers interactive webinars, in-depth courses, and live workshops. Members also gain global networking opportunities, career resources, mentoring, and respected professional certifications.\n\nMission Statement\n\nOur mission is to empower and equip professionals and students with the knowledge, skills, and network they need to excel in project and contract management. We connect individuals to industry insights, educational opportunities, and a supportive community to drive personal and professional growth.\n\nVision Statement\n\nWe envision a world where professionals in project and contract management lead innovation and efficiency across sectors. PCMO cultivates an environment where members can learn, connect, and lead.\n\nOur Values\n\nExcellence — We maintain the highest standards across our programs, resources, and services.\n\nInclusion — We welcome varied perspectives and are committed to diversity.\n\nInnovation — We continually improve how knowledge is shared and professional skills are developed.\n\nCommunity — We create meaningful opportunities for collaboration, mentorship, and connection.\n\nWhy Become a Member?\n\nExclusive benefits designed to accelerate your career include expert-led sessions, structured certification guidance, mentoring from global industry leaders, and recognition for professional excellence.',
+   'About Us\n\nWelcome to the Project and Contracts Management Organisation (PCMO), where we dedicate ourselves to advancing the professions of project and contracts management. At PCMO, we understand the pivotal role these disciplines play across industries, and we commit to fostering growth, innovation, and excellence in these fields. Our community includes professionals and students from the energy sector, infrastructure, IT, and beyond.\n\nWe serve the industry by providing forums for collaboration, mentorship, and best practices. We also provide skills validation through our globally recognized training and certification products and insights from world-class industry research. We are passionately committed to diversity and inclusion.\n\nJoin the PCMO Community Today\n\nReady to take your project and contracts management skills to the next level? Join PCMO today and be part of a community driving excellence and innovation in the industry.\n\nWhy Choose Us?\n\nPCMO is home to respected and experienced professionals in the project and contracts management sectors. Our instructors, speakers, and mentors bring real-world insights, cutting-edge knowledge, and a passion for teaching.\n\nWhether you are seeking certification, enhancing specific skills, or exploring industry trends, PCMO offers interactive webinars, in-depth courses, and live workshops. Members also gain global networking opportunities, career resources, mentoring, and respected professional certifications.\n\nMission Statement\n\nOur mission is to empower and equip professionals and students with the knowledge, skills, and network they need to excel in project and contract management. We connect individuals to industry insights, educational opportunities, and a supportive community to drive personal and professional growth.\n\nVision Statement\n\nWe envision a world where professionals in project and contract management lead innovation and efficiency across sectors. PCMO cultivates an environment where members can learn, connect, and lead.\n\nOur Values\n\nExcellence ÔÇö We maintain the highest standards across our programs, resources, and services.\n\nInclusion ÔÇö We welcome varied perspectives and are committed to diversity.\n\nInnovation ÔÇö We continually improve how knowledge is shared and professional skills are developed.\n\nCommunity ÔÇö We create meaningful opportunities for collaboration, mentorship, and connection.\n\nWhy Become a Member?\n\nExclusive benefits designed to accelerate your career include expert-led sessions, structured certification guidance, mentoring from global industry leaders, and recognition for professional excellence.',
    'https://www.pcmo.world/website/assets/img/about/4.jpg', 'Join the PCMO Community', '/login?mode=register',
    'About PCMO | Project & Contracts Management Organisation',
    'Learn about PCMO, our mission, vision, values, professional community, certifications, and commitment to excellence in project and contracts management.',
@@ -936,7 +936,7 @@ CREATE TABLE IF NOT EXISTS volunteer_hour_logs (
 );
 
 INSERT IGNORE INTO volunteer_opportunities (id,title,description,category,location,time_commitment,spots_available,status) VALUES
-('47000000-0000-4000-8000-000000000001','Emerging Professionals Mentor','Support early-career members through structured monthly mentoring, practical career guidance, and confidence-building conversations.','Mentoring','Hybrid · Dubai / Remote','12 hours',8,'open'),
+('47000000-0000-4000-8000-000000000001','Emerging Professionals Mentor','Support early-career members through structured monthly mentoring, practical career guidance, and confidence-building conversations.','Mentoring','Hybrid ┬À Dubai / Remote','12 hours',8,'open'),
 ('47000000-0000-4000-8000-000000000002','Community Event Coordinator','Help the PCMO team plan expert sessions, welcome participants, coordinate speakers, and prepare post-event feedback summaries.','Events','Remote','8 hours',5,'open'),
 ('47000000-0000-4000-8000-000000000003','Knowledge Library Reviewer','Review project and contracts management resources for quality, relevance, accessibility, and clear professional language.','Knowledge','Remote','10 hours',10,'open');
 
@@ -996,7 +996,7 @@ ALTER TABLE job_recommendations ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NU
 
 INSERT IGNORE INTO job_recommendations (id,slug,title,company,location,employment_type,description,salary,skills,requirements,responsibilities,apply_url,featured,active) VALUES
 ('42000000-0000-4000-8000-000000000001','senior-contracts-manager','Senior Contracts Manager','Global Infrastructure Partners','Dubai, UAE','Full time','Lead commercial and contractual strategy across major infrastructure programmes, managing claims, risk, negotiation, and stakeholder relationships.','Competitive',JSON_ARRAY('FIDIC','Claims','Negotiation'),JSON_ARRAY('10+ years in contracts or commercial management','Strong FIDIC contract knowledge','Excellent negotiation and stakeholder skills'),JSON_ARRAY('Lead contract administration and commercial governance','Manage claims, variations, and dispute avoidance','Coach project teams on contractual obligations'),'https://talentspecialist.org/all-job-search.html',TRUE,TRUE),
-('42000000-0000-4000-8000-000000000002','project-controls-engineer','Project Controls Engineer','NorthStar Energy','Hybrid · Abu Dhabi','Full time','Support integrated planning, earned value, cost forecasting, and schedule risk across complex energy projects.','Competitive',JSON_ARRAY('Primavera P6','EVM','Risk'),JSON_ARRAY('5+ years in project controls','Advanced Primavera P6 capability','Experience with cost and schedule reporting'),JSON_ARRAY('Maintain integrated project schedules','Produce progress and forecast reporting','Support quantitative schedule risk reviews'),'https://talentspecialist.org/all-job-search.html',FALSE,TRUE),
+('42000000-0000-4000-8000-000000000002','project-controls-engineer','Project Controls Engineer','NorthStar Energy','Hybrid ┬À Abu Dhabi','Full time','Support integrated planning, earned value, cost forecasting, and schedule risk across complex energy projects.','Competitive',JSON_ARRAY('Primavera P6','EVM','Risk'),JSON_ARRAY('5+ years in project controls','Advanced Primavera P6 capability','Experience with cost and schedule reporting'),JSON_ARRAY('Maintain integrated project schedules','Produce progress and forecast reporting','Support quantitative schedule risk reviews'),'https://talentspecialist.org/all-job-search.html',FALSE,TRUE),
 ('42000000-0000-4000-8000-000000000003','pmo-analyst','PMO Analyst','Crestline Consulting','Remote','Contract','Provide governance, reporting, portfolio insights, and decision support for a growing transformation portfolio.','Competitive',JSON_ARRAY('Reporting','Governance','Power BI'),JSON_ARRAY('3+ years in a PMO or project analyst role','Strong data visualisation capability','Clear written and verbal communication'),JSON_ARRAY('Maintain portfolio dashboards and governance packs','Track risks, actions, and delivery milestones','Improve reporting standards and data quality'),'https://talentspecialist.org/all-job-search.html',FALSE,TRUE);
 
 CREATE TABLE IF NOT EXISTS account_preferences (
@@ -1159,4 +1159,41 @@ CREATE TABLE IF NOT EXISTS website_activity_records (
   KEY idx_website_activity_email (email),
   KEY idx_website_activity_created (created_at),
   CONSTRAINT fk_website_activity_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS email_logs (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36),
+  template VARCHAR(120) NOT NULL,
+  recipient VARCHAR(255) NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  status ENUM('queued','sent','failed','suppressed','not_configured') NOT NULL DEFAULT 'queued',
+  attempts INT NOT NULL DEFAULT 0,
+  error TEXT,
+  dedup_key VARCHAR(255),
+  provider_message_id VARCHAR(255),
+  sent_at DATETIME,
+  last_attempt_at DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_email_logs_recipient (recipient),
+  KEY idx_email_logs_template (template),
+  KEY idx_email_logs_status (status),
+  KEY idx_email_logs_created (created_at),
+  KEY idx_email_logs_dedup (recipient, template, dedup_key),
+  CONSTRAINT fk_email_logs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS otp_codes (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  code VARCHAR(10) NOT NULL,
+  purpose VARCHAR(40) NOT NULL DEFAULT 'auth',
+  used_at DATETIME,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_otp_user_purpose (user_id, purpose),
+  KEY idx_otp_email (email),
+  CONSTRAINT fk_otp_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

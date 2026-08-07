@@ -1,28 +1,29 @@
-# TODO: Production Configuration Fixes
+﻿# TODO: Email Notification Subsystem (Mailgun)
 
 ## Goals
-- [x] 1. Fix webinar media path so production webinars load (server/index.ts)
-- [x] 2. Fix Dockerfile to copy webinar media (`dist/webinars`) and publications (`output/pdf`) into the runtime image
-- [x] 3. Fix `.dockerignore` so production-required assets (webinars, publications) are not excluded from the build context
-- [x] 4. Verify production build (`npm run build`) succeeds cleanly
-- [x] 5. Verify compiled API output (`server-dist`) contains the corrected webinar path
-- [x] 6. Verify production runtime (start built server, confirm `/api/health` and client serving)
-- [x] 7. Update deployment docs / `.env.production.example` if needed
+- [x] 1. Add `email_logs` tracking table to `server/schema.sql`
+- [x] 2. Add all 12 email template builders to `server/email.ts`
+- [x] 3. Add `sendEmail` service (dedup, logging, retry) to `server/emailService.ts`
+- [x] 4. Wire all 12 email triggers to correct events (`server/index.ts`)
+- [ ] 5. Add OTP generation + verification endpoint (`/api/auth/otp`)
+- [x] 6. Add `GET /api/admin/emails` endpoint + retry endpoint (`POST /api/admin/emails/:id/retry`)
+- [x] 7. Admin Dashboard email status view (via `GET /api/admin/emails`)
+- [ ] 8. Expand unit tests for all 12 builders + delivery/dedup logic
+- [ ] 9. Add `scripts/email_smoke.mjs` end-to-end harness
+- [x] 10. Update `.env.production.example` with Mailgun SMTP vars
+- [x] 11. Update docs (PRODUCTION_SETUP.md)
+- [ ] 12. Build + typecheck + push to GitHub
 
-## Status Notes
-- **Webinar path fix (server/index.ts):** Resolves to `public/webinars` (dev) / `dist/webinars` (prod). ✅
-- **Webinar files verified:** 12 files in `dist/webinars/series-1/` (6 MP4 + 6 scripts). ✅
-- **Member publications verified:** 10 PDFs in `output/pdf/`. ✅
-- **Compiled API verified:** `server-dist/index.js` contains the corrected `dist` path. ✅
-- **Dockerfile updated:** Copies `output/` (publications) and `dist/webinars` (webinar media) into the runtime image. ✅
-- **`.dockerignore` verified:** `output` and `dist` are NOT excluded — production assets reach the build context. ✅
-- **Production runtime verified:** Built server serves `index.html` (HTTP 200) and `/api/health` returns `{"status":"ok","database":"connected"}`. ✅
-- **`.env.production.example` verified:** Contains all required production variables (NODE_ENV, DOMAIN, API_PORT, MYSQL_*, JWT_SECRET, ADMIN_*, STRIPE_*, OPENAI_*). ✅
-
-## Production deployment checklist (for clean machine)
-1. Clone repo, install Node.js 22 LTS and Docker.
-2. Copy `.env.production.example` → `.env.production`; set EVERY placeholder to a unique production value; replace `portal.example.com` with the real domain; generate a unique JWT secret with `openssl rand -base64 48`.
-3. Run `docker compose -f docker-compose.production.yml up -d --build`.
-4. Create admin once: `docker compose -f docker-compose.production.yml run --rm app npm run db:create-admin:prod`.
-5. Confirm `https://YOUR_DOMAIN/api/health` returns `status: ok`.
-6. Test login, uploads, realtime updates, and a Stripe test/live checkout as appropriate.
+## Current State (August 2026)
+- **Transport:** Nodemailer against Mailgun SMTP (or any SMTP provider).
+- **Retry:** 3 attempts (immediate + 2 backoff retries).
+- **Dedup:** within a rolling window per (recipient, template, key).
+- **Deliverability/status:** recorded in `email_logs` and surfaced via Admin Emails API.
+- **ÔÜá´©Å SMTP still needs valid Mailgun credentials.** The `.env` has SMTP config pointing to
+  `smtp.mailgun.org` with the provided `sasikala@petrocontracts.com` / `4wG!$6#vcQUnwU#`,
+  but Mailgun rejects these with `535 Authentication failed`. You need to:
+  1. Verify a sending domain in Mailgun (e.g. `mg.petrocontracts.com`)
+  2. Use the **Mailgun SMTP password** (not mailbox password) from Mailgun ÔåÆ Sending ÔåÆ SMTP
+  3. Set `EMAIL_FROM` to use the verified domain
+- **Admin email monitoring:** Go to `/admin/emails` (or use the API) to view delivery status.
+</content>

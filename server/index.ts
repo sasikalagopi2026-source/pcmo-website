@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+﻿import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -21,7 +21,21 @@ import { requireAdmin, requireAuth, signToken } from "./auth.js";
 import { config } from "./config.js";
 import { db, pingDatabase } from "./db.js";
 import { jsonFields, resources } from "./resources.js";
-import { buildPurchaseConfirmationEmailPayload, buildWelcomeEmailPayload } from "./email.js";
+import {
+  buildWelcomeEmailPayload,
+  buildPurchaseConfirmationEmailPayload,
+  buildNewsletterConfirmationEmailPayload,
+  buildContactAcknowledgementEmailPayload,
+  buildMembershipConfirmationEmailPayload,
+  buildCourseEnrollmentEmailPayload,
+  buildCertificateIssuedEmailPayload,
+  buildAssessmentCompletionEmailPayload,
+  buildPasswordResetEmailPayload,
+  buildOtpEmailPayload,
+  buildEventRegistrationEmailPayload,
+  buildPaymentSuccessEmailPayload,
+} from "./email.js";
+import { sendEmail, retryFailedEmail } from "./emailService.js";
 import { getCourseCheckoutCancelUrl, getCourseCheckoutSuccessUrl, isCourseEnrolled, isPaidCourse } from "./courseCheckout.js";
 
 const app = express();
@@ -241,7 +255,7 @@ const sectionKeywords: Record<string, string[]> = {
   projects: ["projects", "selected projects", "portfolio", "project experience"],
 };
 
-const normalizeHeading = (line: string) => line.trim().replace(/[:\-–—]+$/, "").toLowerCase();
+const normalizeHeading = (line: string) => line.trim().replace(/[:\-ÔÇôÔÇö]+$/, "").toLowerCase();
 
 const findSection = (line: string) => {
   const normalized = normalizeHeading(line);
@@ -643,9 +657,18 @@ const sendWelcomeEmail = async (userId: string, displayName: string) => {
   const payload = buildWelcomeEmailPayload({
     displayName: displayName || recipient.display_name || recipient.email,
     supportEmail: config.email.fromAddress,
+    clientUrl: config.clientUrl,
   });
 
-  await sendEmailToAddress(recipient.email, payload.subject, payload.text, payload.html);
+  await sendEmail({
+    userId,
+    template: "welcome",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: userId,
+  });
 };
 
 const sendPurchaseConfirmationEmail = async ({
@@ -686,7 +709,215 @@ const sendPurchaseConfirmationEmail = async ({
     supportEmail: config.email.fromAddress,
   });
 
-  await sendEmailToAddress(recipient.email, payload.subject, payload.text, payload.html);
+  await sendEmail({
+    userId,
+    template: "purchase_confirmation",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `purchase:${orderNumber}`,
+  });
+};
+
+const getUserDisplayName = async (userId: string): Promise<{ email: string; displayName: string } | null> => {
+  const [rows] = await db.execute<RowDataPacket[]>(
+    `SELECT u.email, COALESCE(p.display_name, u.email) display_name
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id = ?
+     LIMIT 1`,
+    [userId],
+  );
+  const row = rows[0];
+  if (!row?.email) return null;
+  return { email: String(row.email), displayName: String(row.display_name || row.email) };
+};
+
+const sendNewsletterConfirmationEmail = async (email: string) => {
+  const payload = buildNewsletterConfirmationEmailPayload({ email, supportEmail: config.email.fromAddress });
+  await sendEmail({
+    template: "newsletter_confirmation",
+    recipient: email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: email,
+  });
+};
+
+const sendContactAcknowledgementEmail = async (name: string, email: string, subject: string) => {
+  const payload = buildContactAcknowledgementEmailPayload({ name, subject, supportEmail: config.email.fromAddress });
+  await sendEmail({
+    template: "contact_acknowledgement",
+    recipient: email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `${email}:${subject}`,
+  });
+};
+
+const sendPasswordResetEmail = async (userId: string, resetUrl: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildPasswordResetEmailPayload({
+    displayName: recipient.displayName,
+    resetUrl,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "password_reset",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: resetUrl,
+  });
+};
+
+const sendMembershipConfirmationEmail = async (userId: string, planName: string, billingPeriod?: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildMembershipConfirmationEmailPayload({
+    displayName: recipient.displayName,
+    planName,
+    billingPeriod,
+    clientUrl: `${config.clientUrl}/membership`,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "membership_confirmation",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `membership:${userId}:${planName}`,
+  });
+};
+
+const sendCourseEnrollmentEmail = async (userId: string, courseName: string, courseId?: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildCourseEnrollmentEmailPayload({
+    displayName: recipient.displayName,
+    courseName,
+    clientUrl: courseId ? `${config.clientUrl}/courses/${courseId}` : `${config.clientUrl}/courses`,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "course_enrollment",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `enrollment:${userId}:${courseId ?? courseName}`,
+  });
+};
+
+const sendCertificateIssuedEmail = async (userId: string, certificateTitle: string, credentialId?: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildCertificateIssuedEmailPayload({
+    displayName: recipient.displayName,
+    certificateTitle,
+    credentialId,
+    verifyUrl: credentialId ? `${config.clientUrl}/verify/${credentialId}` : undefined,
+    clientUrl: `${config.clientUrl}/certifications`,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "certificate_issued",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `certificate:${userId}:${credentialId ?? certificateTitle}`,
+  });
+};
+
+const sendAssessmentCompletionEmail = async (userId: string, courseName: string, score: number, passed: boolean, retakeUrl?: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildAssessmentCompletionEmailPayload({
+    displayName: recipient.displayName,
+    courseName,
+    score,
+    passed,
+    retakeUrl,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "assessment_completion",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `assessment:${userId}:${courseName}:${Math.round(score)}`,
+  });
+};
+
+const sendEventRegistrationEmail = async (userId: string, eventTitle: string, eventDate?: string, eventTime?: string, location?: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildEventRegistrationEmailPayload({
+    displayName: recipient.displayName,
+    eventTitle,
+    eventDate,
+    eventTime,
+    location,
+    clientUrl: `${config.clientUrl}/events`,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "event_registration",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `event:${userId}:${eventTitle}`,
+  });
+};
+
+const sendPaymentSuccessEmail = async (userId: string, description: string, amount: number, currency: string, transactionId: string) => {
+  const recipient = await getUserDisplayName(userId);
+  if (!recipient) return;
+  const payload = buildPaymentSuccessEmailPayload({
+    displayName: recipient.displayName,
+    description,
+    amount,
+    currency,
+    transactionId,
+    clientUrl: `${config.clientUrl}/account`,
+    supportEmail: config.email.fromAddress,
+  });
+  await sendEmail({
+    userId,
+    template: "payment_success",
+    recipient: recipient.email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `payment:${userId}:${transactionId}`,
+  });
+};
+
+const sendOtpEmail = async (email: string, displayName: string, code: string) => {
+  const payload = buildOtpEmailPayload({ displayName, code, supportEmail: config.email.fromAddress });
+  await sendEmail({
+    template: "otp",
+    recipient: email,
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+    dedupKey: `otp:${email}:${code}`,
+  });
 };
 
 const sendWhatsappNotification = async (userId: string, title: string, message: string, actionUrl?: string) => {
@@ -785,6 +1016,7 @@ const issueCertificateForCourse = async (userId: string, courseId: string, metad
   );
   const course = courses[0];
   const certificateId = randomUUID();
+  const credentialId = `PCMO-${Date.now().toString(36).toUpperCase()}-${certificateId.slice(0, 8).toUpperCase()}`;
   await db.execute(
     `INSERT INTO certifications
      (id, user_id, course_id, title, recipient_name, designation, issuer, credential_id, issue_date, expiry_date, status)
@@ -796,7 +1028,7 @@ const issueCertificateForCourse = async (userId: string, courseId: string, metad
       course?.title ? `${course.title} Certificate` : "Course Certificate",
       recipientName,
       designation,
-      `PCMO-${Date.now().toString(36).toUpperCase()}-${certificateId.slice(0, 8).toUpperCase()}`,
+      credentialId,
       course?.expiry_date ?? null,
     ],
   );
@@ -808,6 +1040,7 @@ const issueCertificateForCourse = async (userId: string, courseId: string, metad
     "certificate",
     "/certifications",
   );
+  await sendCertificateIssuedEmail(userId, course?.title ? `${course.title} Certificate` : "Course Certificate", credentialId);
   await trackMemberActivity(userId, "certificate_issued", "certifications", certificateId, { courseId, ...metadata });
   io.to(`user:${userId}`).emit("certifications:changed", { certificateId, courseId });
   return certificateId;
@@ -922,13 +1155,18 @@ const activateStripeMembership = async (session: Stripe.Checkout.Session) => {
   const userId = session.metadata?.userId;
   if (!subscriptionId || !userId) return;
 
-  const stripeCustomerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
-  const stripeSubscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? null;
-  const stripePaymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
-  const planId = session.metadata?.planId;
-  const planName = session.metadata?.planName ?? "PCMO Membership";
-  let finalMembershipId = membershipId;
-  let membershipUpdated = false;
+    const stripeCustomerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+    const stripeSubscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? null;
+    const stripePaymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+    const planId = session.metadata?.planId;
+    const planName = session.metadata?.planName ?? "PCMO Membership";
+    let billingPeriod: string | undefined;
+    const [billingPeriodRows] = planId
+      ? await db.execute<RowDataPacket[]>("SELECT billing_period FROM membership_plans WHERE id = ? LIMIT 1", [planId])
+      : [[],];
+    billingPeriod = String(billingPeriodRows[0]?.billing_period ?? "");
+    let finalMembershipId = membershipId;
+    let membershipUpdated = false;
 
   const connection = await db.getConnection();
   try {
@@ -1023,6 +1261,7 @@ const activateStripeMembership = async (session: Stripe.Checkout.Session) => {
     orderNumber: session.id,
     receiptNumber: `STRIPE-${session.id}`,
   });
+  await sendMembershipConfirmationEmail(userId, planName, billingPeriod || undefined);
   io.to(`user:${userId}`).emit("membership:changed", { membershipId: finalMembershipId, status: "active" });
   io.to(`user:${userId}`).emit("subscriptions:changed", { subscriptionId, status: "active" });
 };
@@ -1112,6 +1351,14 @@ const activateStripeCourseEnrollment = async (session: Stripe.Checkout.Session) 
   }
   await audit(userId, "stripe_checkout_completed", "courses", courseId, { sessionId: session.id, checkoutType: "course" });
   await trackMemberActivity(userId, "course_enrollment", "courses", courseId, { sessionId: session.id, checkoutType: "course" });
+  const [courseRows] = await db.execute<RowDataPacket[]>("SELECT title FROM courses WHERE id = ? LIMIT 1", [courseId]);
+  await sendPaymentSuccessEmail(
+    userId,
+    `Course access: ${String(courseRows[0]?.title ?? "PCMO course")}`,
+    Number(session.amount_total ?? 0) / 100,
+    String(session.currency ?? "usd").toUpperCase(),
+    session.id,
+  );
   io.to(`user:${userId}`).emit("enrollment:changed", { courseId });
 };
 
@@ -1513,6 +1760,7 @@ app.post("/api/auth/reset-password", asyncRoute(async (req, res) => {
   }
   const passwordHash = await bcrypt.hash(input.password, 12);
   await db.execute("UPDATE users SET password_hash = ? WHERE id = ?", [passwordHash, record.id]);
+  await sendPasswordResetEmail(record.id, `${config.clientUrl}/login`);
   res.json({ success: true });
 }));
 
@@ -1893,6 +2141,7 @@ app.post("/api/courses/:id/checkout", requireAuth, asyncRoute(async (req, res) =
     );
     await audit(req.user!.id, "enroll", "courses", courseId);
     await trackMemberActivity(req.user!.id, "course_enrollment", "courses", courseId);
+    await sendCourseEnrollmentEmail(req.user!.id, String(course.title ?? "Course"), courseId);
     io.to(`user:${req.user!.id}`).emit("enrollment:changed", { courseId });
     return res.status(201).json({ status: "active", success: true });
   }
@@ -1949,6 +2198,7 @@ app.post("/api/courses/:id/enroll", requireAuth, asyncRoute(async (req, res) => 
   );
   await audit(req.user!.id, "enroll", "courses", routeParam(req.params.id));
   await trackMemberActivity(req.user!.id, "course_enrollment", "courses", routeParam(req.params.id));
+  await sendCourseEnrollmentEmail(req.user!.id, String(courses[0].title ?? "Course"), routeParam(req.params.id));
   io.to(`user:${req.user!.id}`).emit("enrollment:changed", { courseId: routeParam(req.params.id) });
   res.status(201).json({ success: true });
 }));
@@ -2225,6 +2475,8 @@ app.post("/api/courses/:id/quiz/submit", requireAuth, asyncRoute(async (req, res
   }
   const remainingAttempts = Math.max(0, assessment.max_attempts - (usedAttempts + 1));
   await trackMemberActivity(req.user!.id, "quiz_submission", "courses", courseId, { attemptId, score, passed });
+  const [courseRows] = await db.execute<RowDataPacket[]>("SELECT title FROM courses WHERE id = ? LIMIT 1", [courseId]);
+  await sendAssessmentCompletionEmail(req.user!.id, String(courseRows[0]?.title ?? "Course"), score, passed, passed ? undefined : `${config.clientUrl}/courses/${courseId}/quiz`);
   io.to(`user:${req.user!.id}`).emit("quiz:submitted", { courseId, attemptId, score });
   res.status(201).json({
     attemptId,
@@ -2438,7 +2690,11 @@ app.get("/api/webinars/series-1/:asset", requireWebinarAuth, asyncRoute(async (r
 }));
 
 app.post("/api/events/:id/register", requireAuth, asyncRoute(async (req, res) => {
-  const [events] = await db.execute<RowDataPacket[]>("SELECT event_type FROM events WHERE id = ? LIMIT 1", [routeParam(req.params.id)]);
+  const eventId = routeParam(req.params.id);
+  const [events] = await db.execute<RowDataPacket[]>(
+    "SELECT id, title, event_type, event_date, event_time, location FROM events WHERE id = ? LIMIT 1",
+    [eventId],
+  );
   if (!events[0]) return res.status(404).json({ error: "Event not found" });
   if (String(events[0].event_type).toLowerCase() === "webinar" && !["admin", "super_admin"].includes(req.user!.role) && !(await hasActiveMembership(req.user!.id))) {
     return res.status(403).json({ error: "An active membership is required to access webinars." });
@@ -2446,10 +2702,17 @@ app.post("/api/events/:id/register", requireAuth, asyncRoute(async (req, res) =>
   await db.execute(
     `INSERT INTO event_registrations (id, user_id, event_id)
      VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = 'registered'`,
-    [randomUUID(), req.user!.id, routeParam(req.params.id)],
+    [randomUUID(), req.user!.id, eventId],
   );
-  await trackMemberActivity(req.user!.id, "event_registration", "events", routeParam(req.params.id));
-  io.to(`user:${req.user!.id}`).emit("event-registration:changed", { eventId: routeParam(req.params.id) });
+  await trackMemberActivity(req.user!.id, "event_registration", "events", eventId);
+  await sendEventRegistrationEmail(
+    req.user!.id,
+    String(events[0].title ?? "PCMO event"),
+    events[0].event_date ? String(events[0].event_date).slice(0, 10) : undefined,
+    events[0].event_time ? String(events[0].event_time).slice(0, 5) : undefined,
+    events[0].location ? String(events[0].location) : undefined,
+  );
+  io.to(`user:${req.user!.id}`).emit("event-registration:changed", { eventId });
   res.status(201).json({ success: true });
 }));
 
@@ -2518,6 +2781,7 @@ app.post("/api/newsletter-subscriptions", asyncRoute(async (req, res) => {
     email,
     submittedData: { email, source: "website_home" },
   });
+  await sendNewsletterConfirmationEmail(email);
   res.status(201).json({ success: true, activityId });
 }));
 
@@ -2574,6 +2838,7 @@ app.post("/api/contact-messages", asyncRoute(async (req, res) => {
     email: input.email,
     submittedData: { ...input, metadata },
   });
+  await sendContactAcknowledgementEmail(input.name, input.email, input.subject);
   io.to("admins").emit("contact-messages:changed", { action: "create", id });
   res.status(201).json({ id, success: true });
 }));
@@ -2936,7 +3201,7 @@ app.post("/api/volunteer/opportunities/:id/apply", requireAuth, asyncRoute(async
   const id = randomUUID();
   await db.execute("INSERT INTO volunteer_applications (id,user_id,opportunity_id,status,hours_logged) VALUES (?,?,?,'submitted',0)", [id, req.user!.id, opportunityId]);
   await trackMemberActivity(req.user!.id, "volunteer_application_submitted", "volunteer-applications", id, { opportunityId, title: opportunity.title });
-  await createNotification(req.user!.id, "Volunteer application submitted", `Your application for “${opportunity.title}” is awaiting review.`, "volunteer", `/volunteer/${opportunityId}`);
+  await createNotification(req.user!.id, "Volunteer application submitted", `Your application for ÔÇ£${opportunity.title}ÔÇØ is awaiting review.`, "volunteer", `/volunteer/${opportunityId}`);
   io.emit("volunteer-applications:changed", { action: "create", id });
   res.status(201).json({ id, opportunity_id: opportunityId, status: "submitted", hours_logged: 0 });
 }));
@@ -3235,7 +3500,7 @@ app.put("/api/resources/:resource/:id", requireAuth, asyncRoute(async (req, res)
       await createNotification(
         String(application.user_id),
         `Volunteer application ${status}`,
-        `Your application for “${String(application.title)}” is now ${status}.`,
+        `Your application for ÔÇ£${String(application.title)}ÔÇØ is now ${status}.`,
         "volunteer",
         `/volunteer/${String(application.opportunity_id)}`,
       );
@@ -3263,7 +3528,7 @@ app.put("/api/resources/:resource/:id", requireAuth, asyncRoute(async (req, res)
       await createNotification(
         String(log.user_id),
         `Volunteer hours ${status}`,
-        `${Number(log.hours)} hours for “${String(log.title)}” were ${status}.`,
+        `${Number(log.hours)} hours for ÔÇ£${String(log.title)}ÔÇØ were ${status}.`,
         "volunteer",
         `/volunteer/${String(log.opportunity_id)}`,
       );
@@ -3465,6 +3730,52 @@ app.get("/api/admin/dashboard", requireAuth, requireAdmin, asyncRoute(async (_re
     reportRows,
     activityAccess,
   });
+}));
+
+app.get("/api/admin/emails", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
+  const requestedPage = Number(req.query.page ?? 1);
+  const requestedLimit = Number(req.query.limit ?? 50);
+  const page = Number.isFinite(requestedPage) ? Math.max(1, Math.trunc(requestedPage)) : 1;
+  const limit = Number.isFinite(requestedLimit) ? Math.min(200, Math.max(1, Math.trunc(requestedLimit))) : 50;
+  const offset = (page - 1) * limit;
+  const conditions: string[] = [];
+  const params: any[] = [];
+  const status = String(req.query.status ?? "").trim();
+  const template = String(req.query.template ?? "").trim();
+  const search = String(req.query.search ?? "").trim();
+  if (["queued", "sent", "failed", "suppressed", "not_configured"].includes(status)) {
+    conditions.push("status = ?");
+    params.push(status);
+  }
+  if (template) {
+    conditions.push("template = ?");
+    params.push(template);
+  }
+  if (search) {
+    conditions.push("(recipient LIKE ? OR subject LIKE ?)");
+    params.push(`%${search}%`, `%${search}%`);
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const [[countRow], [rows]] = await Promise.all([
+    db.execute<RowDataPacket[]>(`SELECT COUNT(*) total FROM email_logs ${where}`, params),
+    db.execute<RowDataPacket[]>(
+      `SELECT email_logs.*, COALESCE(p.display_name, u.email) user_name
+       FROM email_logs
+       LEFT JOIN users u ON u.id = email_logs.user_id
+       LEFT JOIN profiles p ON p.user_id = email_logs.user_id
+       ${where}
+       ORDER BY email_logs.created_at DESC
+       LIMIT ${limit} OFFSET ${offset}`,
+      params,
+    ),
+  ]);
+  res.json({ rows, total: countRow[0]?.total ?? 0, page, limit });
+}));
+
+app.post("/api/admin/emails/:id/retry", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
+  const logId = routeParam(req.params.id);
+  const result = await retryFailedEmail(logId);
+  res.json(result);
 }));
 
 app.get("/api/admin/reports/:section", requireAuth, requireAdmin, asyncRoute(async (req, res) => {
